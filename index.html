@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>T1S // NEURAL LINK</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/575/575454.png">
+
+    <style>
+        :root {
+            --bg: #020617;
+            --card: rgba(15, 23, 42, 0.9);
+            --accent: #00f2ff;
+            --accent-glow: rgba(0, 242, 255, 0.5);
+            --text: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(circle at 50% 50%, #1e293b 0%, #020617 100%),
+                linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
+            background-size: 100% 100%, 30px 30px, 30px 30px;
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background: var(--card);
+            backdrop-filter: blur(20px);
+            padding: 30px;
+            border-radius: 2px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid var(--accent);
+            position: relative;
+        }
+
+        h1 {
+            font-size: 2.8em;
+            text-align: center;
+            color: var(--accent);
+            margin: 0 0 20px 0;
+            letter-spacing: 6px;
+            text-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #1e293b;
+            background: rgba(0,0,0,0.7);
+            color: var(--accent);
+            border-radius: 0;
+            outline: none;
+            font-size: 16px; /* スマホでズームされないためのサイズ */
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            letter-spacing: 2px;
+        }
+
+        button:hover {
+            background: var(--accent);
+            color: #000;
+        }
+
+        #timeline {
+            margin-top: 20px;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .post-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px;
+            margin-top: 10px;
+            border-left: 2px solid var(--accent);
+        }
+
+        .post-user { color: var(--accent); font-size: 0.7em; margin-bottom: 5px; }
+
+        #notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 2px;
+            font-weight: bold;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 0 15px var(--accent-glow);
+            width: 80%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div id="notification"></div>
+
+<div id="app" class="container">
+    <h1>T1S</h1>
+    <div id="auth-ui">
+        <input type="text" id="loginId" placeholder="ID_ACCESS_">
+        <input type="password" id="pinCode" placeholder="PIN_SERIAL">
+        <button onclick="login()">INIT_LOGIN</button>
+        <button style="margin-top:20px; border-color:#334155; color:#475569;" onclick="requestAccess()">REQUEST_ACCESS</button>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyD2-XU5R6upCUgSDJbDz7iSoEQCzrzusLk",
+        authDomain: "t1s-sns.firebaseapp.com",
+        projectId: "t1s-sns",
+        storageBucket: "t1s-sns.firebasestorage.app",
+        messagingSenderId: "377338728077",
+        appId: "1:377338728077:web:1205ed292e4181869adcc4"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let currentUserName = "";
+    let isFirstLoad = true;
+
+    async function login() {
+        const id = document.getElementById('loginId').value;
+        const pin = document.getElementById('pinCode').value;
+        if(!id || !pin) return;
+
+        const snapshot = await db.collection("requests").where("userId", "==", id).where("pin", "==", pin).get();
+        if (snapshot.empty) return alert("ACCESS DENIED");
+
+        const user = snapshot.docs[0].data();
+        if (user.isApproved) {
+            currentUserName = id;
+            showMainPage(id);
+        } else {
+            alert("WAITING FOR APPROVAL");
+        }
+    }
+
+    async function requestAccess() {
+        const id = document.getElementById('loginId').value;
+        const pin = document.getElementById('pinCode').value;
+        if(!id || !pin) return alert("INPUT ID AND PIN");
+        await db.collection("requests").add({ userId: id, pin: pin, isApproved: false, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+        alert("REQUEST SENT");
+    }
+
+    function showMainPage(username) {
+        document.getElementById('app').innerHTML = `
+            <h1 style="font-size: 2em;">T1S // CORE</h1>
+            <div style="font-size:0.7em; color:var(--accent); margin-bottom:15px;">USER: ${username}</div>
+            <textarea id="postInput" placeholder="ENTER DATA..."></textarea>
+            <button onclick="sendPost('${username}')">TRANSMIT</button>
+            <div id="timeline"></div>
+            <button onclick="location.reload()" style="border:none; color:#475569; font-size:0.6em; margin-top:20px;">LOGOUT</button>
+        `;
+        loadPosts();
+        
+        // ブラウザの通知許可を求める
+        if ("Notification" in window) {
+            Notification.requestPermission();
+        }
+    }
+
+    async function sendPost(username) {
+        const text = document.getElementById('postInput').value;
+        if(!text.trim()) return;
+        await db.collection("posts").add({
+            user: username,
+            text: text,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        document.getElementById('postInput').value = "";
+    }
+
+    function notify(msg) {
+        const n = document.getElementById('notification');
+        n.innerText = msg;
+        n.style.display = 'block';
+        setTimeout(() => { n.style.display = 'none'; }, 3000);
+
+        // OS側の通知（ブラウザが開いていればスマホも反応する可能性あり）
+        if (Notification.permission === "granted") {
+            new Notification("T1S Update", { body: msg });
+        }
+    }
+
+    function loadPosts() {
+        db.collection("posts").orderBy("createdAt", "desc").onSnapshot((snapshot) => {
+            const timeline = document.getElementById('timeline');
+            snapshot.docChanges().forEach(change => {
+                if (change.type === "added" && !isFirstLoad) {
+                    const newPost = change.doc.data();
+                    if(newPost.user !== currentUserName) {
+                        notify(`NEW MESSAGE: ${newPost.user}`);
+                    }
+                }
+            });
+
+            timeline.innerHTML = "";
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                timeline.innerHTML += `
+                    <div class="post-card">
+                        <div class="post-user">${data.user}</div>
+                        <div class="post-text">${data.text}</div>
+                    </div>
+                `;
+            });
+            isFirstLoad = false;
+        });
+    }
+</script>
+</body>
+</html>

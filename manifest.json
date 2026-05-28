@@ -1,0 +1,15 @@
+{
+  "name": "T1S NEURAL LINK",
+  "short_name": "T1S",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#00f2ff",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/575/575454.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
