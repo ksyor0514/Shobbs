@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T1S - Middle School SNS</title>
+    <style>
+        :root { --bg: #0a0a0a; --card: #161616; --accent: #00d4ff; --text: #e0e0e0; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: var(--card); padding: 25px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.7); width: 350px; border: 1px solid #333; }
+        h1 { font-size: 2.2em; text-align: center; color: var(--accent); letter-spacing: 3px; margin-bottom: 20px; text-shadow: 0 0 10px rgba(0,212,255,0.3); }
+        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #333; border-radius: 10px; background: #222; color: white; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input:focus, textarea:focus { border-color: var(--accent); }
+        button { width: 100%; padding: 12px; background: var(--accent); color: #000; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        button:hover { background: #0099ff; transform: scale(1.02); }
+        .post-card { background: #222; padding: 12px; border-radius: 10px; margin-top: 10px; border-left: 4px solid var(--accent); text-align: left; }
+        .post-user { font-size: 0.8em; color: var(--accent); font-weight: bold; margin-bottom: 5px; }
+        .post-text { font-size: 1em; line-height: 1.4; }
+        #timeline { margin-top: 20px; max-height: 300px; overflow-y: auto; padding-right: 5px; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<div id="app" class="container">
+    <h1>T1S</h1>
+    <div id="auth-ui">
+        <input type="text" id="loginId" placeholder="ユーザーID">
+        <input type="password" id="pinCode" placeholder="4桁のPINコード">
+        <button onclick="login()">ログイン</button>
+        <button style="background: #252525; color: #aaa; font-size: 0.8em;" onclick="requestAccess()">新規参加を申請</button>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyD2-XU5R6upCUgSDJbDz7iSoEQCzrzusLk",
+        authDomain: "t1s-sns.firebaseapp.com",
+        projectId: "t1s-sns",
+        storageBucket: "t1s-sns.firebasestorage.app",
+        messagingSenderId: "377338728077",
+        appId: "1:377338728077:web:1205ed292e4181869adcc4"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    async function login() {
+        const id = document.getElementById('loginId').value;
+        const pin = document.getElementById('pinCode').value;
+        if(!id || !pin) return alert("入力してね！");
+
+        const snapshot = await db.collection("requests").where("userId", "==", id).where("pin", "==", pin).get();
+        if (snapshot.empty) return alert("見つかりません");
+
+        const user = snapshot.docs[0].data();
+        if (user.isApproved) {
+            showMainPage(id);
+        } else {
+            alert("承認待ちです！");
+        }
+    }
+
+    async function requestAccess() {
+        const id = document.getElementById('loginId').value;
+        const pin = document.getElementById('pinCode').value;
+        if(!id || !pin) return alert("IDとPINを決めてね");
+        await db.collection("requests").add({ userId: id, pin: pin, isApproved: false, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+        alert("管理人に申請を送ったよ！");
+    }
+
+    // メイン画面（投稿機能付き）
+    function showMainPage(username) {
+        document.getElementById('app').innerHTML = `
+            <h1>T1S</h1>
+            <div style="text-align:left; font-size:0.9em; margin-bottom:10px;">👤 ${username}</div>
+            <textarea id="postInput" placeholder="今なにしてる？" rows="3"></textarea>
+            <button onclick="sendPost('${username}')">投稿する</button>
+            <div id="timeline">読み込み中...</div>
+            <button onclick="location.reload()" style="background:none; color:#666; font-size:0.7em;">ログアウト</button>
+        `;
+        loadPosts();
+    }
+
+    // 投稿をFirebaseに保存
+    async function sendPost(username) {
+        const text = document.getElementById('postInput').value;
+        if(!text) return;
+        await db.collection("posts").add({
+            user: username,
+            text: text,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        document.getElementById('postInput').value = ""; // 入力欄を空に
+    }
+
+    // タイムラインをリアルタイムで表示
+    function loadPosts() {
+        db.collection("posts").orderBy("createdAt", "desc").onSnapshot((snapshot) => {
+            const timeline = document.getElementById('timeline');
+            timeline.innerHTML = "";
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                timeline.innerHTML += `
+                    <div class="post-card">
+                        <div class="post-user">@${data.user}</div>
+                        <div class="post-text">${data.text}</div>
+                    </div>
+                `;
+            });
+        });
+    }
+</script>
+</body>
+</html>
