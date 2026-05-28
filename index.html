@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShoSNS 復旧版</title>
+    <style>
+        body { background: #020617; color: #00f2ff; font-family: sans-serif; padding: 20px; }
+        input, textarea { width: 100%; padding: 10px; margin: 5px 0; background: #000; color: #00f2ff; border: 1px solid #00f2ff; }
+        button { width: 100%; padding: 10px; background: #00f2ff; color: #000; border: none; font-weight: bold; cursor: pointer; }
+        .post { border-bottom: 1px solid #1e293b; padding: 10px; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <h1>ShoSNS // 復旧モード</h1>
+    <input type="text" id="loginId" placeholder="ユーザーID">
+    <input type="password" id="pinCode" placeholder="PIN">
+    <button onclick="login()">ログイン</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+    // 設定
+    const firebaseConfig = {
+        apiKey: "AIzaSyD2-XU5R6upCUgSDJbDz7iSoEQCzrzusLk",
+        authDomain: "t1s-sns.firebaseapp.com",
+        projectId: "t1s-sns",
+        storageBucket: "t1s-sns.appspot.com",
+        messagingSenderId: "377338728077",
+        appId: "1:377338728077:web:1205ed292e4181869adcc4"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    async function login() {
+        const id = document.getElementById('loginId').value;
+        const pin = document.getElementById('pinCode').value;
+        
+        try {
+            const snapshot = await db.collection("requests").where("userId", "==", id).get();
+            if (snapshot.empty) return alert("ユーザーがいないよ");
+            
+            const data = snapshot.docs[0].data();
+            if (data.pin == pin && data.isApproved) {
+                showMain(id);
+            } else {
+                alert("PINが違うか、まだ未承認だよ");
+            }
+        } catch (e) {
+            alert("エラー: " + e.message);
+        }
+    }
+
+    function showMain(username) {
+        document.getElementById('app').innerHTML = `
+            <h2>ようこそ ${username}</h2>
+            <textarea id="msg" placeholder="投稿する"></textarea>
+            <button onclick="post('${username}')">送信</button>
+            <div id="tl"></div>
+        `;
+        db.collection("posts").orderBy("createdAt", "desc").onSnapshot(s => {
+            let html = "";
+            s.forEach(d => {
+                const p = d.data();
+                html += `<div class="post"><b>${p.user}:</b> ${p.text}</div>`;
+            });
+            document.getElementById('tl').innerHTML = html;
+        });
+    }
+
+    async function post(user) {
+        const text = document.getElementById('msg').value;
+        if(!text) return;
+        await db.collection("posts").add({ user, text, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        document.getElementById('msg').value = "";
+    }
+</script>
+</body>
+</html>
