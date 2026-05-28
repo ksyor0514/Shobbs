@@ -121,8 +121,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <script>
-    // 1. 変数と設定（ここを一番上に置くことで初期化エラーを防ぐ）
-    let currentUserName = ""; // グローバル変数を最初に宣言
+    // 1. 変数の宣言（一番上に置く！）
+    let currentUserName = "";
 
     const appId = "e78d2560-389d-4d0e-a981-5214050d87ca";
     const firebaseConfig = {
@@ -134,27 +134,20 @@
         appId: "1:377338728077:web:1205ed292e4181869adcc4"
     };
 
-    // Firebase初期化
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const { SkyWayContext, SkyWayRoom, SkyWayStreamFactory } = skyway_sdk_core;
 
-    // 2. ログイン関数
+    // 2. ログイン
     async function login() {
-        const idInput = document.getElementById('loginId');
-        const pinInput = document.getElementById('pinCode');
-        if (!idInput || !pinInput) return;
-
-        const id = idInput.value;
-        const pin = pinInput.value;
-        
+        const id = document.getElementById('loginId').value;
+        const pin = document.getElementById('pinCode').value;
         try {
             const snapshot = await db.collection("requests").where("userId", "==", id).get();
             if (snapshot.empty) return alert("ユーザーが見つかりません");
-            
             const data = snapshot.docs[0].data();
             if (data.pin == pin && data.isApproved) {
-                currentUserName = id; // ここでログインユーザー名を確定
+                currentUserName = id; // ここで代入
                 showMainPage(id);
             } else {
                 alert("PINが違うか、承認されていません");
@@ -164,12 +157,9 @@
         }
     }
 
-    // 3. メイン画面の表示
+    // 3. メイン画面
     function showMainPage(username) {
-        const root = document.getElementById('root');
-        if (!root) return;
-
-        root.innerHTML = `
+        document.getElementById('root').innerHTML = `
             <h1>ShoSNS</h1>
             <div class="grid-layout">
                 <div class="panel">
@@ -189,29 +179,23 @@
         loadPosts();
     }
 
-    // 4. 投稿機能
+    // 4. 投稿
     async function sendPost() {
         const textInput = document.getElementById('postInput');
-        if (!textInput || !textInput.value.trim()) return;
-
-        try {
-            await db.collection("posts").add({ 
-                user: currentUserName, 
-                text: textInput.value, 
-                createdAt: firebase.firestore.FieldValue.serverTimestamp() 
-            });
-            textInput.value = "";
-        } catch (e) {
-            alert("投稿エラー: " + e.message);
-        }
+        const text = textInput.value;
+        if(!text.trim()) return;
+        await db.collection("posts").add({ 
+            user: currentUserName, 
+            text: text, 
+            createdAt: firebase.firestore.FieldValue.serverTimestamp() 
+        });
+        textInput.value = "";
     }
 
-    // 5. ボイスチャット (SkyWay)
+    // 5. ボイチャ（マイクエラー検知強化版）
     async function joinVC() {
         const btn = document.getElementById('joinBtn');
         const dot = document.getElementById('vc-dot');
-        if (!btn || !dot) return;
-
         btn.disabled = true;
         btn.innerText = "接続中...";
         try {
@@ -232,32 +216,29 @@
 
             room.onStreamPublished.add((e) => subscribe(e.publication));
             room.publications.forEach(subscribe);
-
+            
             btn.innerText = "通話中";
             btn.style.borderColor = "#00ff00";
             dot.style.background = "#00ff00";
         } catch (e) {
-            alert("通話エラー: マイクの使用を許可してください");
+            console.error(e);
+            alert("マイクが使えません。URLが https:// であることと、ブラウザの設定でマイクを許可しているか確認してね！");
             btn.disabled = false;
             btn.innerText = "入室する";
         }
     }
 
-    // 6. タイムライン読み込み
+    // 6. タイムライン
     function loadPosts() {
-        const tl = document.getElementById('timeline');
-        if (!tl) return;
-
         db.collection("posts").orderBy("createdAt", "desc").onSnapshot((snapshot) => {
+            const tl = document.getElementById('timeline');
+            if(!tl) return;
             tl.innerHTML = "";
             snapshot.forEach(doc => {
                 const p = doc.data();
                 const card = document.createElement('div');
                 card.className = 'post-card';
-                card.innerHTML = `
-                    <div class="post-user">${p.user || 'Unknown'}</div>
-                    <div class="post-text">${p.text || ''}</div>
-                `;
+                card.innerHTML = `<div class="post-user">${p.user || 'Unknown'}</div><div class="post-text">${p.text || ''}</div>`;
                 tl.appendChild(card);
             });
         });
