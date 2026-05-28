@@ -18,8 +18,7 @@
         .status-dot { display: inline-block; width: 10px; height: 10px; background: #334155; border-radius: 50%; margin-right: 8px; }
         input, textarea { width: 100%; padding: 12px; margin: 8px 0; background: rgba(0,0,0,0.7); color: var(--accent); border: 1px solid #1e293b; box-sizing: border-box; font-size: 16px; }
         button { width: 100%; padding: 14px; background: transparent; color: var(--accent); border: 1px solid var(--accent); font-weight: bold; cursor: pointer; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        #timeline { display: flex; flex-direction: column; gap: 15px; }
+        button:disabled { border-color: #475569; color: #475569; cursor: not-allowed; opacity: 0.5; }
         .post-card { background: rgba(255, 255, 255, 0.03); padding: 15px; border-left: 3px solid var(--accent); margin-bottom: 10px; }
         .auth-container { max-width: 400px; margin: 100px auto; }
     </style>
@@ -35,14 +34,14 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@skyway-sdk/core/dist/skyway_core.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@skyway-sdk/core/dist/skyway_core.js"></script>
 
 <script>
-    // 変数の準備
     let currentUserName = "";
     let db, SkyWayContext, SkyWayRoom, SkyWayStreamFactory;
+    let isSkyWayReady = false;
 
     const appId = "e78d2560-389d-4d0e-a981-5214050d87ca";
     const firebaseConfig = {
@@ -54,29 +53,36 @@
         appId: "1:377338728077:web:1205ed292e4181869adcc4"
     };
 
-    // 読み込み完了後に初期化（これがInitializationエラー対策）
-    window.onload = () => {
+    // 初期化処理をまとめる
+    function initApp() {
         firebase.initializeApp(firebaseConfig);
         db = firebase.firestore();
-        if (typeof skyway_sdk_core !== 'undefined') {
+        
+        // SkyWayの存在確認
+        if (window.skyway_sdk_core) {
             SkyWayContext = skyway_sdk_core.SkyWayContext;
             SkyWayRoom = skyway_sdk_core.SkyWayRoom;
             SkyWayStreamFactory = skyway_sdk_core.SkyWayStreamFactory;
+            isSkyWayReady = true;
+            console.log("SkyWay Ready!");
+        } else {
+            setTimeout(initApp, 500); // まだなら0.5秒後に再試行
         }
-    };
+    }
+    initApp();
 
     async function login() {
         const id = document.getElementById('loginId').value;
         const pin = document.getElementById('pinCode').value;
         try {
             const snapshot = await db.collection("requests").where("userId", "==", id).get();
-            if (snapshot.empty) return alert("ユーザーが見つかりません");
+            if (snapshot.empty) return alert("ユーザーなし");
             const data = snapshot.docs[0].data();
             if (data.pin == pin && data.isApproved) {
                 currentUserName = id;
                 showMainPage();
-            } else { alert("PINエラーまたは未承認"); }
-        } catch (e) { alert("エラー: " + e.message); }
+            } else { alert("認証失敗"); }
+        } catch (e) { alert("ログインエラー"); }
     }
 
     function showMainPage() {
@@ -98,6 +104,11 @@
     }
 
     async function joinVC() {
+        if (!isSkyWayReady || !SkyWayContext) {
+            alert("通信システムの準備中です。数秒待ってからもう一度押してね！");
+            return;
+        }
+
         const btn = document.getElementById('joinBtn');
         const dot = document.getElementById('vc-dot');
         btn.disabled = true;
@@ -106,6 +117,8 @@
         try {
             const context = await SkyWayContext.Create(appId);
             const room = await SkyWayRoom.FindOrCreate(context, { type: 'p2p', name: 'ShoRoom' });
+            
+            // マイク取得（ユーザー操作直後なので通りやすい）
             const audioStream = await SkyWayStreamFactory.createMicrophoneAudioStream();
             const me = await room.join();
             await me.publish(audioStream);
@@ -123,7 +136,8 @@
             btn.innerText = "通話中";
             dot.style.background = "#00ff00";
         } catch (e) {
-            alert("ボイチャ失敗: " + e.message);
+            console.error(e);
+            alert("ボイチャ接続に失敗しました。マイク許可を確認してね！");
             btn.disabled = false;
             btn.innerText = "入室する";
         }
