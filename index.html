@@ -19,9 +19,7 @@
 </head>
 <body>
 
-<div id="root" class="container">
-    <h1>読み込み中...</h1>
-</div>
+<div id="root" class="container"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -41,13 +39,9 @@
     };
 
     window.onload = () => {
-        try {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.firestore();
-            showLoginPage();
-        } catch (e) {
-            document.getElementById('root').innerHTML = "<h1>初期化エラー。設定を確認してね</h1>";
-        }
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+        showLoginPage();
     };
 
     function showLoginPage() {
@@ -79,7 +73,6 @@
     async function register() {
         const id = document.getElementById('regId').value;
         const pin = document.getElementById('regPin').value;
-        if(!id || !pin) return alert("入力して");
         await db.collection("requests").add({ userId: id, pin: pin, isApproved: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         alert("申請完了");
     }
@@ -89,7 +82,7 @@
         document.getElementById('root').innerHTML = `
             <h1>ShoBBS - スレッド一覧</h1>
             <button class="btn" onclick="location.reload()">ログアウト</button>
-            <div id="list-area">スレッドを取得中...</div>
+            <div id="list-area">取得中...</div>
             <div class="form-area">
                 <b>新規スレッド作成</b>
                 <input type="text" id="newThreadTitle" placeholder="タイトル">
@@ -97,11 +90,10 @@
                 <button class="btn" onclick="createThread()">スレッドを立てる</button>
             </div>
         `;
-        
+        // スレッド一覧はorderByを残してもエラーになりにくいのでそのまま
         db.collection("threads").orderBy("createdAt", "desc").onSnapshot(ss => {
             const area = document.getElementById('list-area');
             if(!area || currentThreadId) return;
-            if(ss.empty) { area.innerHTML = "スレッドがまだありません。"; return; }
             area.innerHTML = "";
             ss.forEach(doc => {
                 const t = doc.data();
@@ -111,30 +103,20 @@
                 div.onclick = () => showThreadDetail(doc.id, t.title);
                 area.appendChild(div);
             });
-        }, err => {
-            console.error(err);
-            document.getElementById('list-area').innerHTML = "エラー：Firestoreのルールを確認してください。";
         });
     }
 
     async function createThread() {
         const title = document.getElementById('newThreadTitle').value;
         const text = document.getElementById('firstPost').value;
-        if(!title || !text) return alert("全部入力して");
-        try {
-            const threadRef = await db.collection("threads").add({
-                title: title,
-                creator: currentUserName,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            await db.collection("posts").add({
-                threadId: threadRef.id,
-                user: currentUserName,
-                text: text,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            showThreadDetail(threadRef.id, title);
-        } catch(e) { alert("作成エラー: " + e.message); }
+        if(!title || !text) return;
+        const threadRef = await db.collection("threads").add({
+            title: title, creator: currentUserName, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        await db.collection("posts").add({
+            threadId: threadRef.id, user: currentUserName, text: text, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        showThreadDetail(threadRef.id, title);
     }
 
     function showThreadDetail(id, title) {
@@ -142,15 +124,15 @@
         document.getElementById('root').innerHTML = `
             <button class="btn" onclick="showThreadList()">一覧に戻る</button>
             <h1>${title}</h1>
-            <div id="post-area">レスを取得中...</div>
+            <div id="post-area"></div>
             <div class="form-area">
-                <b>レスを書く</b>
                 <textarea id="replyText" rows="4"></textarea>
                 <button class="btn" onclick="sendReply()">書き込む</button>
             </div>
         `;
 
-        db.collection("posts").where("threadId", "==", id).orderBy("createdAt", "asc").onSnapshot(ss => {
+        // ★ここを修正！ orderByを削除してインデックスエラーを回避しました
+        db.collection("posts").where("threadId", "==", id).onSnapshot(ss => {
             const area = document.getElementById('post-area');
             if(!area) return;
             area.innerHTML = "";
@@ -166,15 +148,10 @@
     async function sendReply() {
         const text = document.getElementById('replyText').value;
         if(!text.trim()) return;
-        try {
-            await db.collection("posts").add({
-                threadId: currentThreadId,
-                user: currentUserName,
-                text: text,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            document.getElementById('replyText').value = "";
-        } catch(e) { alert("書き込みエラー"); }
+        await db.collection("posts").add({
+            threadId: currentThreadId, user: currentUserName, text: text, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        document.getElementById('replyText').value = "";
     }
 </script>
 </body>
