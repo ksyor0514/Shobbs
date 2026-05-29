@@ -6,128 +6,40 @@
     <title>ShoBBS</title>
     <style>
         :root { 
-            /* 最初の頃の深い紺色から黒へのグラデーションを再現 */
             --bg: radial-gradient(circle at center, #0f172a 0%, #020617 100%); 
             --card: rgba(15, 23, 42, 0.8); 
             --accent: #00f2ff; 
             --text: #e2e8f0; 
             --border: rgba(0, 242, 255, 0.3);
         }
-        body { 
-            background: var(--bg); 
-            background-attachment: fixed;
-            color: var(--text); 
-            font-family: 'Helvetica Neue', Arial, sans-serif; 
-            margin: 0; 
-            padding: 10px; 
-            display: flex; 
-            justify-content: center; 
-            min-height: 100vh;
-        }
-        .container { 
-            width: 100%; 
-            max-width: 800px; 
-            background: var(--card); 
-            border: 1px solid var(--border); 
-            backdrop-filter: blur(10px);
-            min-height: 95vh; 
-            padding: 20px; 
-            box-shadow: 0 0 30px rgba(0, 242, 255, 0.1);
-            box-sizing: border-box;
-            border-radius: 8px;
-        }
-        h1 { 
-            text-align: center; 
-            color: var(--accent); 
-            letter-spacing: 5px; 
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 15px;
-            font-size: 2em;
-            text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
-            margin-top: 10px;
-        }
-
-        /* スレッド一覧 */
-        .thread-item { 
-            padding: 15px; 
-            border: 1px solid var(--border); 
-            margin-bottom: 12px; 
-            cursor: pointer; 
-            transition: all 0.3s ease;
-            background: rgba(255,255,255,0.02);
-            border-radius: 4px;
-        }
-        .thread-item:hover { 
-            border-color: var(--accent); 
-            background: rgba(0, 242, 255, 0.1); 
-            transform: translateY(-2px);
-        }
-        .thread-title { color: var(--accent); font-weight: bold; font-size: 1.1em; }
-
-        /* フォーム */
-        .form-area { 
-            background: rgba(0,0,0,0.4); 
-            border: 1px solid var(--border); 
-            padding: 20px; 
-            margin: 20px 0; 
-            border-radius: 4px;
-        }
-        input, textarea { 
-            width: 100%; 
-            padding: 12px; 
-            margin: 8px 0; 
-            background: rgba(0, 0, 0, 0.6); 
-            color: #fff; 
-            border: 1px solid var(--border); 
-            box-sizing: border-box;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-        input:focus, textarea:focus {
-            border-color: var(--accent);
-            outline: none;
-            box-shadow: 0 0 8px rgba(0, 242, 255, 0.3);
-        }
-        button { 
-            width: 100%; 
-            padding: 14px; 
-            background: transparent; 
-            color: var(--accent); 
-            border: 1px solid var(--accent); 
-            font-weight: bold; 
-            cursor: pointer; 
-            transition: 0.3s;
-            letter-spacing: 2px;
-            margin-top: 10px;
-        }
+        body { background: var(--bg); background-attachment: fixed; color: var(--text); font-family: sans-serif; margin: 0; padding: 10px; display: flex; justify-content: center; min-height: 100vh; }
+        .container { width: 100%; max-width: 800px; background: var(--card); border: 1px solid var(--border); backdrop-filter: blur(10px); min-height: 95vh; padding: 20px; box-sizing: border-box; border-radius: 8px; }
+        h1 { text-align: center; color: var(--accent); letter-spacing: 5px; border-bottom: 1px solid var(--border); padding-bottom: 15px; font-size: 2em; text-shadow: 0 0 10px rgba(0, 242, 255, 0.5); }
+        .thread-item { padding: 15px; border: 1px solid var(--border); margin-bottom: 12px; cursor: pointer; transition: 0.3s; background: rgba(255,255,255,0.02); border-radius: 4px; }
+        .thread-item:hover { border-color: var(--accent); background: rgba(0, 242, 255, 0.1); }
+        .form-area { background: rgba(0,0,0,0.4); border: 1px solid var(--border); padding: 20px; margin: 20px 0; border-radius: 4px; }
+        input, textarea { width: 100%; padding: 12px; margin: 8px 0; background: rgba(0, 0, 0, 0.6); color: #fff; border: 1px solid var(--border); box-sizing: border-box; border-radius: 4px; }
+        button { width: 100%; padding: 14px; background: transparent; color: var(--accent); border: 1px solid var(--accent); font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
         button:hover { background: var(--accent); color: #020617; }
-
-        /* レス表示 */
-        .post { 
-            border-left: 4px solid var(--accent); 
-            padding: 15px; 
-            margin-bottom: 20px; 
-            background: rgba(255,255,255,0.03);
-            border-radius: 0 4px 4px 0;
-        }
-        .post-info { color: var(--accent); font-size: 0.85em; margin-bottom: 8px; opacity: 0.7; }
-        .post-body { line-height: 1.7; white-space: pre-wrap; }
-
-        .nav { display: flex; justify-content: flex-end; margin-bottom: 15px; }
-        .logout-btn { width: auto; padding: 5px 15px; font-size: 0.8em; }
+        .post { border-left: 4px solid var(--accent); padding: 15px; margin-bottom: 20px; background: rgba(255,255,255,0.03); }
+        /* 通話エリア */
+        #call-container { width: 100%; height: 400px; margin-top: 15px; border: 2px solid var(--accent); display: none; }
+        .nav { display: flex; justify-content: flex-end; margin-bottom: 15px; gap: 10px; }
+        .btn-small { width: auto; padding: 5px 15px; font-size: 0.8em; margin: 0; }
     </style>
 </head>
 <body>
 
 <div id="root" class="container"></div>
 
+<script src="https://meet.jit.si/external_api.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <script>
     let currentUserName = "";
     let currentThreadId = null;
-    let db;
+    let db, jitsiApi = null;
 
     const firebaseConfig = {
         apiKey: "AIzaSyD2-XU5R6upCUgSDJbDz7iSoEQCzrzusLk",
@@ -153,10 +65,9 @@
                 <button onclick="login()">アクセス開始</button>
             </div>
             <div style="text-align:center; margin-top:30px; border-top: 1px solid var(--border); padding-top: 20px;">
-                <p style="font-size:0.9em; opacity:0.8;">新規利用の申請はこちら</p>
                 <input type="text" id="regId" placeholder="希望ID">
                 <input type="password" id="regPin" placeholder="希望PIN">
-                <button onclick="register()" style="font-size:0.8em;">利用申請を送る</button>
+                <button onclick="register()">利用申請</button>
             </div>
         `;
     }
@@ -165,47 +76,40 @@
         const id = document.getElementById('loginId').value;
         const pin = document.getElementById('pinCode').value;
         const snap = await db.collection("requests").where("userId", "==", id).get();
-        if (snap.empty) return alert("ユーザーが見つかりません");
+        if (snap.empty) return alert("ユーザーなし");
         const data = snap.docs[0].data();
         if (data.pin == pin && data.isApproved) {
             currentUserName = id;
             showThreadList();
-        } else { alert("認証に失敗しました。承認待ちか、PINが違います。"); }
+        } else { alert("認証失敗"); }
     }
 
     async function register() {
         const id = document.getElementById('regId').value;
         const pin = document.getElementById('regPin').value;
-        if(!id || !pin) return alert("入力してください");
         await db.collection("requests").add({ userId: id, pin: pin, isApproved: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-        alert("申請を送りました。管理者の承認をお待ちください。");
+        alert("申請完了");
     }
 
     function showThreadList() {
         currentThreadId = null;
+        if(jitsiApi) { jitsiApi.dispose(); jitsiApi = null; }
         document.getElementById('root').innerHTML = `
-            <div class="nav"><button class="logout-btn" onclick="location.reload()">ログアウト</button></div>
+            <div class="nav"><button class="btn-small" onclick="location.reload()">ログアウト</button></div>
             <h1>ShoBBS</h1>
             <div class="form-area">
-                <p style="margin:0 0 10px 0; color:var(--accent);">新しいスレッドを立てる</p>
                 <input type="text" id="newThreadTitle" placeholder="スレッドのタイトル">
-                <textarea id="firstPost" placeholder="最初のメッセージ" rows="3"></textarea>
+                <textarea id="firstPost" placeholder="最初のメッセージ"></textarea>
                 <button onclick="createThread()">スレッド作成</button>
             </div>
             <div id="list-area">同期中...</div>
         `;
-        
         db.collection("threads").orderBy("createdAt", "desc").onSnapshot(ss => {
             const area = document.getElementById('list-area');
             if(!area || currentThreadId) return;
             area.innerHTML = "";
             ss.forEach(doc => {
-                const t = doc.data();
-                area.innerHTML += `
-                    <div class="thread-item" onclick="showThreadDetail('${doc.id}', '${t.title.replace(/'/g, "\\'")}')">
-                        <div class="thread-title">■ ${t.title}</div>
-                        <div style="font-size:0.8em; opacity:0.6; margin-top:8px;">作成者: ${t.creator}</div>
-                    </div>`;
+                area.innerHTML += `<div class="thread-item" onclick="showThreadDetail('${doc.id}', '${doc.data().title}')">■ ${doc.data().title}</div>`;
             });
         });
     }
@@ -214,21 +118,19 @@
         const title = document.getElementById('newThreadTitle').value;
         const text = document.getElementById('firstPost').value;
         if(!title || !text) return;
-        const threadRef = await db.collection("threads").add({
-            title: title, creator: currentUserName, createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        await db.collection("posts").add({
-            threadId: threadRef.id, user: currentUserName, text: text, createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        const threadRef = await db.collection("threads").add({ title, creator: currentUserName, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        await db.collection("posts").add({ threadId: threadRef.id, user: currentUserName, text, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         showThreadDetail(threadRef.id, title);
     }
 
     function showThreadDetail(id, title) {
         currentThreadId = id;
         document.getElementById('root').innerHTML = `
-            <div class="nav"><button class="logout-btn" onclick="showThreadList()">一覧に戻る</button></div>
+            <div class="nav"><button class="btn-small" onclick="showThreadList()">戻る</button></div>
             <h1>ShoBBS</h1>
-            <div style="text-align:center; color:var(--accent); margin-bottom:10px; font-weight:bold;">【${title}】</div>
+            <div style="text-align:center; color:var(--accent); font-weight:bold;">【${title}】</div>
+            <button id="call-btn" onclick="toggleCall('${id}')">通話を開始/参加</button>
+            <div id="call-container"></div>
             <div class="form-area">
                 <textarea id="replyText" rows="3" placeholder="メッセージを入力..."></textarea>
                 <button onclick="sendReply()">書き込む</button>
@@ -239,34 +141,42 @@
         db.collection("posts").where("threadId", "==", id).onSnapshot(ss => {
             const area = document.getElementById('post-area');
             if(!area) return;
-            
             let posts = [];
-            ss.forEach(doc => { posts.push(doc.data()); });
-
-            // 最新を上にするソート
-            posts.sort((a, b) => {
-                const timeA = a.createdAt ? a.createdAt.toMillis() : Date.now();
-                const timeB = b.createdAt ? b.createdAt.toMillis() : Date.now();
-                return timeB - timeA;
-            });
-
+            ss.forEach(doc => posts.push(doc.data()));
+            posts.sort((a, b) => (b.createdAt?.toMillis() || Date.now()) - (a.createdAt?.toMillis() || Date.now()));
             area.innerHTML = "";
-            posts.forEach((p) => {
-                area.innerHTML += `
-                    <div class="post">
-                        <div class="post-info">投稿者: ${p.user}</div>
-                        <div class="post-body">${p.text}</div>
-                    </div>`;
+            posts.forEach(p => {
+                area.innerHTML += `<div class="post"><div style="color:var(--accent); font-size:0.8em;">${p.user}</div><div>${p.text}</div></div>`;
             });
         });
+    }
+
+    function toggleCall(threadId) {
+        const container = document.getElementById('call-container');
+        const btn = document.getElementById('call-btn');
+        if (container.style.display === 'block') {
+            container.style.display = 'none';
+            btn.innerText = '通話を開始/参加';
+            if(jitsiApi) jitsiApi.dispose();
+        } else {
+            container.style.display = 'block';
+            btn.innerText = '通話を終了';
+            const domain = "meet.jit.si";
+            const options = {
+                roomName: "ShoBBS_" + threadId, // スレッドごとに個別の部屋
+                width: "100%",
+                height: 400,
+                parentNode: container,
+                userInfo: { displayName: currentUserName }
+            };
+            jitsiApi = new JitsiMeetExternalAPI(domain, options);
+        }
     }
 
     async function sendReply() {
         const text = document.getElementById('replyText').value;
         if(!text.trim()) return;
-        await db.collection("posts").add({
-            threadId: currentThreadId, user: currentUserName, text: text, createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        await db.collection("posts").add({ threadId: currentThreadId, user: currentUserName, text, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         document.getElementById('replyText').value = "";
     }
 </script>
