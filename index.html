@@ -26,7 +26,9 @@
         .admin-btn { border-color: var(--admin-color); color: var(--admin-color); }
         .admin-btn:hover { background: var(--admin-color); color: #fff; }
         .req-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #334155; }
-        #call-status { margin-bottom: 15px; padding: 8px; background: rgba(34, 211, 238, 0.1); border-radius: 6px; font-size: 0.85em; text-align: center; display: none; color: var(--accent); }
+        /* 通話ステータスのデザイン微調整 */
+        #call-status-area { margin-bottom: 15px; padding: 12px; background: rgba(34, 211, 238, 0.05); border: 1px dashed var(--border); border-radius: 8px; font-size: 0.85em; display: none; }
+        .online-list { color: var(--accent); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -40,8 +42,6 @@
     let currentUserName = "";
     let currentThreadId = null;
     let db, client, localAudioTrack;
-    
-    // 【重要】監視を解除するための変数
     let unsubscribeThreads = null;
     let unsubscribePosts = null;
 
@@ -83,15 +83,12 @@
     }
 
     function showThreadList() {
-        // 前の監視を止める
         if(unsubscribeThreads) unsubscribeThreads();
         if(unsubscribePosts) unsubscribePosts();
-        
         currentThreadId = null;
         leaveCall();
         let adminBtn = (currentUserName === ADMIN_USER_ID) ? `<button class="btn-small admin-btn" onclick="showAdminPage()">管理画面</button>` : "";
         document.getElementById('root').innerHTML = `<div class="nav">${adminBtn}<button class="btn-small" onclick="location.reload()">ログアウト</button></div><h1>ShoBBS</h1><div class="form-area"><input type="text" id="newThreadTitle" placeholder="スレタイ"><textarea id="firstPost" placeholder="本文"></textarea><button onclick="createThread()">新規スレッド</button></div><div id="list-area">更新中...</div>`;
-        
         unsubscribeThreads = db.collection("threads").orderBy("createdAt", "desc").onSnapshot(ss => {
             const area = document.getElementById('list-area');
             if(!area) return;
@@ -103,12 +100,24 @@
     }
 
     function showThreadDetail(id, title) {
-        // スレッド一覧の監視を止める
         if(unsubscribeThreads) unsubscribeThreads();
         if(unsubscribePosts) unsubscribePosts();
-
         currentThreadId = id;
-        document.getElementById('root').innerHTML = `<div class="nav"><button class="btn-small" onclick="showThreadList()">戻る</button></div><h1 style="font-size:1.2em; border:none;">${title}</h1><div id="call-status">未接続</div><div style="display:flex; gap:10px; margin-bottom:20px;"><button id="join-btn" onclick="joinCall('${id}')">通話開始</button><button id="leave-btn" style="display:none; border-color:#f87171; color:#f87171;" onclick="leaveCall()">終了</button></div><div class="form-area"><textarea id="replyText" rows="3" placeholder="コメントを書く"></textarea><button onclick="sendReply()">書き込む</button></div><div id="post-area"></div>`;
+        document.getElementById('root').innerHTML = `
+            <div class="nav"><button class="btn-small" onclick="showThreadList()">戻る</button></div>
+            <h1 style="font-size:1.2em; border:none; margin-bottom:10px;">${title}</h1>
+            <div id="call-status-area">
+                <div>● 通話中: <span id="online-users" class="online-list">あなたのみ</span></div>
+            </div>
+            <div style="display:flex; gap:10px; margin-bottom:20px;">
+                <button id="join-btn" onclick="joinCall('${id}')">通話に参加</button>
+                <button id="leave-btn" style="display:none; border-color:#f87171; color:#f87171;" onclick="leaveCall()">通話を終了</button>
+            </div>
+            <div class="form-area">
+                <textarea id="replyText" rows="3" placeholder="コメントを書く"></textarea>
+                <button onclick="sendReply()">書き込む</button>
+            </div>
+            <div id="post-area"></div>`;
 
         unsubscribePosts = db.collection("posts").where("threadId", "==", id).onSnapshot(ss => {
             const area = document.getElementById('post-area');
@@ -121,6 +130,48 @@
                 area.innerHTML += `<div class="post"><div class="post-info">${p.user}</div><div class="post-body">${p.text}</div></div>`;
             });
         });
+    }
+
+    async function joinCall(channelId) {
+        try {
+            // Agoraに自分の名前を送信するために、uidとして使用（本来は数値だが文字列も受け付ける設定で対応）
+            await client.join(AGORA_APP_ID, channelId, null, currentUserName);
+            
+            client.on("user-published", async (user, mediaType) => {
+                await client.subscribe(user, mediaType);
+                if (mediaType === "audio") user.audioTrack.play();
+                updateOnlineUsers();
+            });
+
+            client.on("user-left", () => {
+                updateOnlineUsers();
+            });
+
+            localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+            await client.publish([localAudioTrack]);
+            
+            document.getElementById('join-btn').style.display = 'none';
+            document.getElementById('leave-btn').style.display = 'block';
+            document.getElementById('call-status-area').style.display = 'block';
+            updateOnlineUsers();
+        } catch (e) { alert("通話に失敗しました"); }
+    }
+
+    function updateOnlineUsers() {
+        const area = document.getElementById('online-users');
+        if(!area) return;
+        // リモートユーザー（自分以外）のIDを取得
+        const remoteUsers = client.remoteUsers.map(u => u.uid);
+        const allUsers = [currentUserName, ...remoteUsers];
+        area.innerText = allUsers.join(", ");
+    }
+
+    async function leaveCall() {
+        if (localAudioTrack) { localAudioTrack.stop(); localAudioTrack.close(); localAudioTrack = null; }
+        await client.leave();
+        if(document.getElementById('join-btn')) document.getElementById('join-btn').style.display = 'block';
+        if(document.getElementById('leave-btn')) document.getElementById('leave-btn').style.display = 'none';
+        if(document.getElementById('call-status-area')) document.getElementById('call-status-area').style.display = 'none';
     }
 
     async function showAdminPage() {
@@ -151,30 +202,6 @@
         const threadRef = await db.collection("threads").add({ title, creator: currentUserName, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         await db.collection("posts").add({ threadId: threadRef.id, user: currentUserName, text, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         showThreadDetail(threadRef.id, title);
-    }
-
-    async function joinCall(channelId) {
-        try {
-            client.on("user-published", async (user, mediaType) => {
-                await client.subscribe(user, mediaType);
-                if (mediaType === "audio") user.audioTrack.play();
-            });
-            await client.join(AGORA_APP_ID, channelId, null, null);
-            localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-            await client.publish([localAudioTrack]);
-            document.getElementById('join-btn').style.display = 'none';
-            document.getElementById('leave-btn').style.display = 'block';
-            document.getElementById('call-status').style.display = 'block';
-            document.getElementById('call-status').innerText = "● 通話中";
-        } catch (e) { alert("通話に失敗しました"); }
-    }
-
-    async function leaveCall() {
-        if (localAudioTrack) { localAudioTrack.stop(); localAudioTrack.close(); localAudioTrack = null; }
-        await client.leave();
-        if(document.getElementById('join-btn')) document.getElementById('join-btn').style.display = 'block';
-        if(document.getElementById('leave-btn')) document.getElementById('leave-btn').style.display = 'none';
-        if(document.getElementById('call-status')) document.getElementById('call-status').style.display = 'none';
     }
 
     async function sendReply() {
