@@ -9,27 +9,158 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="ShoBBS">
     <style>
-        :root { --bg: #0a0f1a; --card: #111827; --accent: #22d3ee; --text: #cbd5e1; --border: rgba(34, 211, 238, 0.2); --sub-text: #94a3b8; --admin-color: #f87171; --online: #10b981; }
-        body { background-color: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; padding: 15px; display: flex; justify-content: center; min-height: 100vh; line-height: 1.5; }
-        .container { width: 100%; max-width: 700px; background: var(--card); border: 1px solid var(--border); min-height: 90vh; padding: 24px; box-sizing: border-box; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h1 { text-align: center; color: var(--accent); letter-spacing: 4px; margin-bottom: 24px; font-size: 1.8em; }
-        .thread-item { padding: 18px; border: 1px solid var(--border); margin-bottom: 12px; cursor: pointer; transition: 0.2s; background: rgba(255,255,255,0.02); border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .thread-item:hover { border-color: var(--accent); background: rgba(34, 211, 238, 0.05); }
-        .form-area { background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 18px; margin-bottom: 24px; border-radius: 8px; }
-        input, textarea { width: 100%; padding: 12px; margin: 8px 0; background: #0f172a; color: #fff; border: 1px solid #334155; box-sizing: border-box; border-radius: 6px; font-size: 16px; outline: none; }
-        button { width: 100%; padding: 12px; border: 1px solid var(--accent); background: transparent; color: var(--accent); border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 8px; }
-        button:hover { background: var(--accent); color: #0f172a; }
-        .post { border-left: 3px solid var(--accent); padding: 12px 16px; margin-bottom: 16px; background: rgba(255,255,255,0.03); border-radius: 0 8px 8px 0; position: relative; }
+        :root { 
+            --bg: #05050a; 
+            --card: #0d0d1a; 
+            --accent: #00f0ff; 
+            --pink: #ff007f;
+            --green: #39ff14;
+            --text: #e0e0ff; 
+            --border: #00f0ff;
+            --sub-text: #8a8aaf;
+        }
+        body { 
+            background-color: var(--bg); 
+            color: var(--text); 
+            font-family: 'Courier New', sans-serif; 
+            margin: 0; 
+            padding: 15px; 
+            display: flex; 
+            justify-content: center; 
+            min-height: 100vh; 
+            line-height: 1.5; 
+        }
+        .container { 
+            width: 100%; 
+            max-width: 700px; 
+            background: var(--card); 
+            border: 2px solid var(--border); 
+            min-height: 90vh; 
+            padding: 24px; 
+            box-sizing: border-box; 
+            border-radius: 16px; 
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2), inset 0 0 15px rgba(0, 240, 255, 0.1); 
+        }
+        h1 { 
+            text-align: center; 
+            color: var(--accent); 
+            letter-spacing: 6px; 
+            margin-bottom: 24px; 
+            font-size: 2.2em; 
+            text-shadow: 0 0 10px var(--accent), 0 0 20px rgba(0, 240, 255, 0.5);
+        }
+        .thread-item { 
+            padding: 18px; 
+            border: 1px solid rgba(0, 240, 255, 0.3); 
+            margin-bottom: 12px; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            background: rgba(0, 240, 255, 0.02); 
+            border-radius: 8px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .thread-item:hover { 
+            border-color: var(--pink); 
+            background: rgba(255, 0, 127, 0.05); 
+            box-shadow: 0 0 10px rgba(255, 0, 127, 0.3);
+        }
+        .form-area { 
+            background: rgba(13, 13, 26, 0.8); 
+            border: 1px solid rgba(0, 240, 255, 0.4); 
+            padding: 18px; 
+            margin-bottom: 24px; 
+            border-radius: 8px; 
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
+        }
+        /* お知らせ専用のネオンピンク枠 */
+        .notice-area {
+            border: 2px solid var(--pink);
+            background: rgba(255, 0, 127, 0.02);
+            padding: 15px;
+            margin-bottom: 24px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.15), inset 0 0 10px rgba(255, 0, 127, 0.05);
+        }
+        .notice-title {
+            color: var(--pink);
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 8px;
+            text-shadow: 0 0 8px var(--pink);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        input, textarea { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 8px 0; 
+            background: #05050a; 
+            color: #fff; 
+            border: 1px solid rgba(0, 240, 255, 0.5); 
+            box-sizing: border-box; 
+            border-radius: 6px; 
+            font-size: 16px; 
+            outline: none; 
+            transition: 0.3s;
+        }
+        input:focus, textarea:focus {
+            border-color: var(--pink);
+            box-shadow: 0 0 8px rgba(255, 0, 127, 0.5);
+        }
+        button { 
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid var(--accent); 
+            background: transparent; 
+            color: var(--accent); 
+            border-radius: 6px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            margin-top: 8px; 
+            text-shadow: 0 0 5px var(--accent);
+            box-shadow: 0 0 5px rgba(0, 240, 255, 0.2);
+        }
+        button:hover { 
+            background: var(--accent); 
+            color: #05050a; 
+            box-shadow: 0 0 15px var(--accent);
+            text-shadow: none;
+        }
+        .btn-pink {
+            border-color: var(--pink);
+            color: var(--pink);
+            text-shadow: 0 0 5px var(--pink);
+        }
+        .btn-pink:hover {
+            background: var(--pink);
+            color: #05050a;
+            box-shadow: 0 0 15px var(--pink);
+        }
+        .post { 
+            border-left: 3px solid var(--accent); 
+            padding: 12px 16px; 
+            margin-bottom: 16px; 
+            background: rgba(255,255,255,0.01); 
+            border-radius: 0 8px 8px 0; 
+            position: relative;
+            border-image: linear-gradient(to bottom, var(--accent), var(--pink)) 1 100%;
+        }
         .post-info { color: var(--sub-text); font-size: 0.8em; margin-bottom: 4px; display: flex; justify-content: space-between; }
         .nav { display: flex; justify-content: flex-end; margin-bottom: 15px; gap: 10px; flex-wrap: wrap; }
         .btn-small { width: auto; padding: 6px 12px; font-size: 0.75em; margin: 0; }
-        .admin-btn { border-color: var(--admin-color); color: var(--admin-color); }
-        .del-btn { color: var(--admin-color); cursor: pointer; font-weight: bold; padding: 0 5px; margin-left: 10px; }
-        #call-status-area { margin-bottom: 15px; padding: 12px; background: rgba(34, 211, 238, 0.05); border: 1px dashed var(--border); border-radius: 8px; font-size: 0.85em; display: none; }
-        .view-count { font-size: 0.8em; color: var(--accent); opacity: 0.8; }
-        .member-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #334155; }
-        .status-online { color: var(--online); font-weight: bold; }
+        .admin-btn { border-color: var(--pink); color: var(--pink); text-shadow: 0 0 5px var(--pink); }
+        .admin-btn:hover { background: var(--pink); color: #fff; box-shadow: 0 0 10px var(--pink); }
+        .del-btn { color: var(--pink); cursor: pointer; font-weight: bold; padding: 0 5px; margin-left: 10px; text-shadow: 0 0 5px var(--pink); }
+        #call-status-area { margin-bottom: 15px; padding: 12px; background: rgba(0, 240, 255, 0.05); border: 1px dashed var(--border); border-radius: 8px; font-size: 0.85em; display: none; box-shadow: 0 0 10px rgba(0, 240, 255, 0.2); }
+        .view-count { font-size: 0.8em; color: var(--accent); text-shadow: 0 0 5px var(--accent); }
+        .member-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid rgba(0, 240, 255, 0.2); }
+        .status-online { color: var(--green); font-weight: bold; text-shadow: 0 0 8px var(--green); }
         .status-offline { color: var(--sub-text); }
+        .notice-text { color: #fff; font-size: 0.95em; white-space: pre-wrap; word-break: break-all; }
     </style>
 </head>
 <body>
@@ -43,7 +174,7 @@
     let currentUserName = "";
     let currentThreadId = null;
     let db, client, localAudioTrack;
-    let unsubscribeThreads = null, unsubscribePosts = null, unsubscribePresence = null, unsubscribeMembers = null;
+    let unsubscribeThreads = null, unsubscribePosts = null, unsubscribePresence = null, unsubscribeMembers = null, unsubscribeNotice = null;
     let keepAliveInterval = null;
 
     const firebaseConfig = {
@@ -60,30 +191,19 @@
         db = firebase.firestore();
         client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
         showLoginPage();
-        setupExitEvents(); // ★離脱検知イベントを設定
+        setupExitEvents();
     };
 
-    // ★ 画面を閉じたり裏に回した時の処理
     function setupExitEvents() {
-        // タブが非表示になったり閉じられたりしたとき
         document.addEventListener("visibilitychange", () => {
-            if (document.visibilityState === "hidden") {
-                goOfflineSync();
-            } else if (currentUserName) {
-                keepAlive(); // 戻ってきたらオンライン再開
-                if (currentThreadId) updatePresence(currentThreadId);
-            }
+            if (document.visibilityState === "hidden") { goOfflineSync(); } 
+            else if (currentUserName) { keepAlive(); if (currentThreadId) updatePresence(currentThreadId); }
         });
-        // ページが完全に閉じられるとき
-        window.addEventListener("beforeunload", () => {
-            goOfflineSync();
-        });
+        window.addEventListener("beforeunload", () => { goOfflineSync(); });
     }
 
-    // 完全にオフライン状態にする（同期処理）
     function goOfflineSync() {
         if (!currentUserName) return;
-        // ユーザーのステータスを即座に消去（または過去の時間にしてオフラインにする）
         db.collection("users_status").doc(currentUserName).delete();
         db.collection("presence").doc(currentUserName).delete();
     }
@@ -117,19 +237,14 @@
 
     async function keepAlive() {
         if (!currentUserName || document.visibilityState === "hidden") return;
-        await db.collection("users_status").doc(currentUserName).set({
-            lastActive: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        await db.collection("users_status").doc(currentUserName).set({ lastActive: firebase.firestore.FieldValue.serverTimestamp() });
     }
 
     async function updatePresence(threadId) {
         if (!currentUserName || document.visibilityState === "hidden") return;
         const ref = db.collection("presence").doc(currentUserName);
-        if (threadId) {
-            await ref.set({ threadId, lastSeen: firebase.firestore.FieldValue.serverTimestamp() });
-        } else {
-            await ref.delete();
-        }
+        if (threadId) { await ref.set({ threadId, lastSeen: firebase.firestore.FieldValue.serverTimestamp() }); } 
+        else { await ref.delete(); }
     }
 
     async function showThreadList() {
@@ -137,11 +252,20 @@
         if(unsubscribePosts) unsubscribePosts();
         if(unsubscribePresence) unsubscribePresence();
         if(unsubscribeMembers) unsubscribeMembers();
+        if(unsubscribeNotice) unsubscribeNotice();
         await updatePresence(null);
         currentThreadId = null;
         leaveCall();
         
         let adminBtn = (currentUserName === ADMIN_USER_ID) ? `<button class="btn-small admin-btn" onclick="showAdminPage()">管理画面</button>` : "";
+        
+        // adminだけに表示するお知らせ入力フォーム
+        let adminNoticeForm = (currentUserName === ADMIN_USER_ID) ? `
+            <div style="margin-top:10px; border-top:1px dashed rgba(255,0,127,0.3); padding-top:10px;">
+                <textarea id="noticeInput" rows="2" placeholder="管理者用お知らせ入力欄"></textarea>
+                <button onclick="updateNotice()" class="btn-small btn-pink">お知らせ更新</button>
+            </div>` : "";
+
         document.getElementById('root').innerHTML = `
             <div class="nav">
                 <button class="btn-small" onclick="showMembersPage()">メンバー一覧</button>
@@ -154,8 +278,29 @@
                 <textarea id="firstPost" placeholder="本文"></textarea>
                 <button onclick="createThread()">新規スレッド</button>
             </div>
+            
+            <div class="notice-area">
+                <div class="notice-title">📢 NOTICE BOARD</div>
+                <div id="notice-text-content" class="notice-text">お知らせ読み込み中...</div>
+                ${adminNoticeForm}
+            </div>
+
             <div id="list-area">更新中...</div>`;
         
+        // お知らせのリアルタイム監視
+        unsubscribeNotice = db.collection("system").doc("notice").onSnapshot(doc => {
+            const area = document.getElementById("notice-text-content");
+            if (!area) return;
+            if (doc.exists) {
+                area.innerText = doc.data().text || "現在お知らせはありません。";
+                if(document.getElementById("noticeInput") && !document.getElementById("noticeInput").value) {
+                    document.getElementById("noticeInput").value = doc.data().text || "";
+                }
+            } else {
+                area.innerText = "現在お知らせはありません。";
+            }
+        });
+
         unsubscribePresence = db.collection("presence").onSnapshot(ps => {
             const counts = {};
             ps.forEach(d => { counts[d.data().threadId] = (counts[d.data().threadId] || 0) + 1; });
@@ -186,6 +331,13 @@
         });
     }
 
+    // ★ お知らせ更新用（admin限定）
+    async function updateNotice() {
+        const text = document.getElementById("noticeInput").value;
+        await db.collection("system").doc("notice").set({ text: text, updatedBy: currentUserName, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+        alert("お知らせを更新しました！");
+    }
+
     async function deleteThread(threadId) {
         if(!confirm("このスレッドと、スレ内のすべての投稿を削除しますか？")) return;
         await db.collection("threads").doc(threadId).delete();
@@ -200,12 +352,13 @@
         if(unsubscribeThreads) unsubscribeThreads();
         if(unsubscribePosts) unsubscribePosts();
         if(unsubscribeMembers) unsubscribeMembers();
+        if(unsubscribeNotice) unsubscribeNotice();
         await updatePresence(id);
         currentThreadId = id;
         
         document.getElementById('root').innerHTML = `
             <div class="nav"><button class="btn-small" onclick="showThreadList()">戻る</button></div>
-            <h1 style="font-size:1.2em; border:none; margin-bottom:10px;">${title}</h1>
+            <h1 style="font-size:1.2em; border:none; margin-bottom:10px; text-shadow:0 0 5px var(--accent);">${title}</h1>
             <div id="call-status-area"><div>● 通話中: <span id="online-users" style="color:var(--accent); font-weight:bold;">あなたのみ</span></div></div>
             <div style="display:flex; gap:10px; margin-bottom:20px;"><button id="join-btn" onclick="joinCall('${id}')">通話に参加</button><button id="leave-btn" style="display:none; border-color:#f87171; color:#f87171;" onclick="leaveCall()">通話を終了</button></div>
             <div class="form-area"><textarea id="replyText" rows="3" placeholder="コメントを書く"></textarea><button onclick="sendReply()">書き込む</button></div>
@@ -234,6 +387,7 @@
         if(unsubscribeThreads) unsubscribeThreads();
         if(unsubscribePosts) unsubscribePosts();
         if(unsubscribeMembers) unsubscribeMembers();
+        if(unsubscribeNotice) unsubscribeNotice();
         
         document.getElementById('root').innerHTML = `
             <div class="nav"><button class="btn-small" onclick="showThreadList()">戻る</button></div>
@@ -306,6 +460,7 @@
         if(unsubscribeThreads) unsubscribeThreads();
         if(unsubscribePosts) unsubscribePosts();
         if(unsubscribeMembers) unsubscribeMembers();
+        if(unsubscribeNotice) unsubscribeNotice();
         document.getElementById('root').innerHTML = `<div class="nav"><button class="btn-small" onclick="showThreadList()">戻る</button></div><h1>ユーザー承認</h1><div id="admin-list" class="form-area">読み込み中...</div>`;
         db.collection("requests").where("isApproved", "==", false).onSnapshot(ss => {
             const area = document.getElementById('admin-list');
