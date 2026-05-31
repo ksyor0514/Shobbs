@@ -44,6 +44,7 @@
     let currentThreadId = null;
     let db, client, localAudioTrack;
     let unsubscribeThreads = null, unsubscribePosts = null, unsubscribePresence = null, unsubscribeMembers = null;
+    let keepAliveInterval = null;
 
     const firebaseConfig = {
         apiKey: "AIzaSyD2-XU5R6upCUgSDJbDz7iSoEQCzrzusLk",
@@ -59,7 +60,33 @@
         db = firebase.firestore();
         client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
         showLoginPage();
+        setupExitEvents(); // ★離脱検知イベントを設定
     };
+
+    // ★ 画面を閉じたり裏に回した時の処理
+    function setupExitEvents() {
+        // タブが非表示になったり閉じられたりしたとき
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "hidden") {
+                goOfflineSync();
+            } else if (currentUserName) {
+                keepAlive(); // 戻ってきたらオンライン再開
+                if (currentThreadId) updatePresence(currentThreadId);
+            }
+        });
+        // ページが完全に閉じられるとき
+        window.addEventListener("beforeunload", () => {
+            goOfflineSync();
+        });
+    }
+
+    // 完全にオフライン状態にする（同期処理）
+    function goOfflineSync() {
+        if (!currentUserName) return;
+        // ユーザーのステータスを即座に消去（または過去の時間にしてオフラインにする）
+        db.collection("users_status").doc(currentUserName).delete();
+        db.collection("presence").doc(currentUserName).delete();
+    }
 
     function showLoginPage() {
         document.getElementById('root').innerHTML = `<h1>ShoBBS</h1><div class="form-area"><input type="text" id="loginId" placeholder="ユーザーID"><input type="password" id="pinCode" placeholder="PINコード"><button onclick="login()">ログイン</button></div><div style="text-align:center;"><input type="text" id="regId" placeholder="新規ID"><input type="password" id="regPin" placeholder="新規PIN"><button onclick="register()" class="btn-small">利用申請を送る</button></div>`;
@@ -74,9 +101,9 @@
         if (data.pin == pin && data.isApproved) { 
             currentUserName = id; 
             showThreadList(); 
-            // ログイン中定期的にオンライン情報を更新（30秒ごと）
             keepAlive();
-            setInterval(keepAlive, 30000);
+            if(keepAliveInterval) clearInterval(keepAliveInterval);
+            keepAliveInterval = setInterval(keepAlive, 30000);
         } else { alert("認証待ち または PIN違い"); }
     }
 
@@ -89,14 +116,14 @@
     }
 
     async function keepAlive() {
-        if (!currentUserName) return;
+        if (!currentUserName || document.visibilityState === "hidden") return;
         await db.collection("users_status").doc(currentUserName).set({
             lastActive: firebase.firestore.FieldValue.serverTimestamp()
         });
     }
 
     async function updatePresence(threadId) {
-        if (!currentUserName) return;
+        if (!currentUserName || document.visibilityState === "hidden") return;
         const ref = db.collection("presence").doc(currentUserName);
         if (threadId) {
             await ref.set({ threadId, lastSeen: firebase.firestore.FieldValue.serverTimestamp() });
@@ -140,7 +167,6 @@
                 ss.forEach(doc => {
                     const count = counts[doc.id] || 0;
                     const data = doc.data();
-                    // 管理者であるか、自分が作ったスレッドなら削除ボタンを出す
                     const canDelete = (currentUserName === ADMIN_USER_ID || data.creator === currentUserName);
                     const delBtn = canDelete ? `<span class="del-btn" onclick="event.stopPropagation(); deleteThread('${doc.id}')">🗑️</span>` : "";
                     
@@ -162,9 +188,7 @@
 
     async function deleteThread(threadId) {
         if(!confirm("このスレッドと、スレ内のすべての投稿を削除しますか？")) return;
-        // スレッド本体の削除
         await db.collection("threads").doc(threadId).delete();
-        // スレ内の投稿もまとめて削除
         const postsSnap = await db.collection("posts").where("threadId", "==", threadId).get();
         const batch = db.batch();
         postsSnap.forEach(doc => batch.delete(doc.ref));
@@ -216,14 +240,12 @@
             <h1>メンバー一覧</h1>
             <div id="member-list-area" class="form-area">読み込み中...</div>`;
 
-        // リアルタイムでオンライン状態とユーザー一覧を監視
         unsubscribeMembers = db.collection("users_status").onSnapshot(statusSnap => {
             const onlineUsers = {};
             const now = Date.now();
             statusSnap.forEach(doc => {
                 const data = doc.data();
                 if (data.lastActive) {
-                    // 最終アクティブが2分以内ならオンラインとみなす
                     const diff = now - data.lastActive.toMillis();
                     if (diff < 120000) onlineUsers[doc.id] = true;
                 }
