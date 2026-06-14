@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ShoBBS - Miiverse & Insta Edition</title>
+    <title>ShoBBS - Ultimate Edition</title>
     <link rel="apple-touch-icon" href="https://chromebookuser0001-cyber.github.io/sho-/shophoto.jpg">
     <link rel="icon" href="https://chromebookuser0001-cyber.github.io/sho-/shophoto.jpg">
     <meta name="mobile-web-app-capable" content="yes">
@@ -51,16 +51,24 @@
             text-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
         }
 
-        /* 📸 インスタ風ストーリーズ・オンラインエリア */
+        /* 📸 インスタ風ストーリーズ・横スクロールエリア */
         .stories-container {
             display: flex;
             gap: 14px;
-            overflow-x: auto;
-            padding: 10px 5px 15px 5px;
+            overflow-x: auto; 
+            white-space: nowrap;
+            padding: 10px 10px 15px 10px;
             margin-bottom: 15px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            -webkit-overflow-scrolling: touch; 
         }
-        .stories-container::-webkit-scrollbar { display: none; } /* スクロールバー非表示 */
+        .stories-container::-webkit-scrollbar {
+            height: 4px; 
+        }
+        .stories-container::-webkit-scrollbar-thumb {
+            background: rgba(0, 240, 255, 0.3);
+            border-radius: 10px;
+        }
         
         .story-item {
             display: flex;
@@ -69,6 +77,7 @@
             font-size: 0.75em;
             color: var(--text);
             min-width: 60px;
+            max-width: 60px;
             text-align: center;
         }
         .story-avatar {
@@ -87,7 +96,6 @@
             box-sizing: border-box;
             position: relative;
         }
-        /* オンラインの時はインスタ風のグラデーションリングが光る */
         .story-item.online .story-avatar {
             border: 2px solid transparent;
             background-image: linear-gradient(#101026, #101026), linear-gradient(135deg, var(--pink), var(--accent));
@@ -107,21 +115,19 @@
             border: 2px solid var(--card);
         }
 
-        /* 🔔 招待通知用バナー */
-        .alert-banner {
-            background: rgba(255, 0, 127, 0.15);
-            border: 1px solid var(--pink);
-            color: #fff;
-            padding: 12px;
-            border-radius: 14px;
+        /* 🔔 プッシュ通知許可要請エリア */
+        .push-banner {
+            background: rgba(0, 240, 255, 0.05);
+            border: 1px dashed var(--accent);
+            padding: 10px;
+            border-radius: 12px;
             margin-bottom: 15px;
-            font-size: 0.85em;
-            font-weight: bold;
-            display: none;
-            box-shadow: 0 0 15px rgba(255, 0, 127, 0.2);
+            font-size: 0.8em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        /* 🟢 ミーバース（Miiverse）風スレッド・投稿カード */
         .thread-item { 
             background: rgba(255, 255, 255, 0.02); 
             border: 1px solid rgba(255, 255, 255, 0.08); 
@@ -134,7 +140,6 @@
         .thread-item:hover { 
             border-color: var(--accent); 
             background: rgba(0, 240, 255, 0.02);
-            transform: scale(0.99);
         }
         .thread-header {
             display: flex;
@@ -166,7 +171,7 @@
             text-shadow: 0 0 5px var(--pink);
         }
 
-        input, textarea { 
+        input, textarea, select { 
             width: 100%; 
             padding: 12px; 
             margin: 6px 0; 
@@ -178,7 +183,6 @@
             font-size: 15px; 
             outline: none; 
         }
-        input:focus, textarea:focus { border-color: var(--accent); }
         
         button { 
             width: 100%; 
@@ -190,12 +194,9 @@
             font-weight: bold; 
             cursor: pointer; 
             font-size: 15px;
-            transition: opacity 0.2s;
         }
-        button:hover { opacity: 0.9; }
         .btn-pink { background: linear-gradient(90deg, #ff007f, #ff0055); }
 
-        /* 💬 ミーバース風 投稿吹き出しボックス */
         .post { 
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid rgba(255, 255, 255, 0.06);
@@ -209,7 +210,6 @@
             gap: 8px;
             color: var(--accent); 
             font-size: 0.85em; 
-            font-weight: bold;
             margin-bottom: 8px; 
         }
         .post-avatar-mini {
@@ -223,34 +223,31 @@
             font-size: 0.7em;
             border: 1px solid var(--accent);
         }
-        .post-body {
-            font-size: 0.95em;
-            color: #fff;
-            padding-left: 4px;
-        }
+        .post-body { font-size: 0.95em; color: #fff; }
         .post-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.03); padding-top: 8px;}
 
+        /* 👀 既読ボタンのデザイン */
         .glow-btn {
             background: rgba(255, 255, 255, 0.04);
             border: none;
             color: var(--sub-text);
-            padding: 4px 12px;
+            padding: 5px 14px;
             font-size: 0.8em;
             border-radius: 14px;
             cursor: pointer;
-            width: auto;
-            margin: 0;
+            font-weight: bold;
+            transition: all 0.2s;
         }
-        .glow-btn.liked {
-            color: var(--pink);
-            background: rgba(255, 0, 127, 0.08);
+        .glow-btn.liked { 
+            color: var(--pink); 
+            background: rgba(255, 0, 127, 0.15); 
+            box-shadow: 0 0 10px rgba(255, 0, 127, 0.3);
         }
         .likers-list { font-size: 0.75em; color: var(--sub-text); }
         .nav { display: flex; justify-content: flex-end; margin-bottom: 15px; gap: 6px; }
         .btn-small { width: auto; padding: 5px 12px; font-size: 0.75em; margin: 0; background: rgba(255,255,255,0.05); }
-        .del-btn { color: var(--sub-text); cursor: pointer; margin-left: auto; font-size: 0.9em; }
+        .del-btn { color: var(--sub-text); cursor: pointer; margin-left: auto; }
         #call-status-area { margin-bottom: 12px; padding: 10px; background: rgba(0, 240, 255, 0.02); border: 1px dashed var(--accent); border-radius: 12px; font-size: 0.85em; display: none; }
-        .view-count { font-size: 0.8em; color: var(--sub-text); }
         .talkers-count { font-size: 0.8em; color: var(--green); font-weight: bold; margin-top: 4px; display: block;}
         .notice-text { color: #fff; font-size: 0.9em; white-space: pre-wrap; }
     </style>
@@ -266,7 +263,7 @@
     let currentUserName = "";
     let currentThreadId = null;
     let db, client, localAudioTrack;
-    let unsubscribeThreads = null, unsubscribePosts = null, unsubscribePresence = null, unsubscribeMembers = null, unsubscribeNotice = null, unsubscribeCalls = null, unsubscribeRequests = null;
+    let unsubscribeThreads = null, unsubscribePosts = null, unsubscribePresence = null, unsubscribeMembers = null, unsubscribeNotice = null, unsubscribeCalls = null;
     let keepAliveInterval = null;
 
     const firebaseConfig = {
@@ -284,6 +281,7 @@
         client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
         showLoginPage();
         setupExitEvents();
+        setupNotificationMock(); 
     };
 
     function setupExitEvents() {
@@ -301,6 +299,58 @@
         db.collection("active_calls").doc(currentUserName).delete();
     }
 
+    function requestNotificationPermission() {
+        if (!("Notification" in window)) return alert("このブラウザは通知に対応していません");
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+                alert("通知がONになりました！");
+                document.getElementById("push-banner-area").style.display = "none";
+            }
+        });
+    }
+
+    function sendPushNotification(title, body) {
+        if (Notification.permission === "granted") {
+            navigator.serviceWorker.ready.then(registration => {
+                registration.showNotification(title, { body: body, icon: 'https://chromebookuser0001-cyber.github.io/sho-/shophoto.jpg' });
+            });
+        }
+    }
+
+    function setupNotificationMock() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:text/javascript,self.addEventListener("push",e=>e.waitUntil(self.registration.showNotification("ShoBBS",{body:e.data.text()})))');
+        }
+
+        let isFirstLoadThread = true;
+        db.collection("threads").orderBy("createdAt", "desc").limit(1).onSnapshot(ss => {
+            if (isFirstLoadThread) { isFirstLoadThread = false; return; }
+            ss.forEach(doc => {
+                const d = doc.data();
+                if(d.creator !== currentUserName) {
+                    sendPushNotification("🚀 新しいスレッドが作られたぞ！", `${d.creator}: ${d.title}`);
+                }
+            });
+        });
+
+        let isFirstLoadNotice = true;
+        db.collection("system").doc("notice").onSnapshot(doc => {
+            if (isFirstLoadNotice) { isFirstLoadNotice = false; return; }
+            if (doc.exists && currentUserName) {
+                sendPushNotification("📢 重要なお知らせが更新されたぞ！", doc.data().text);
+            }
+        });
+
+        db.collection("system").doc("invites").onSnapshot(doc => {
+            if (doc.exists && currentUserName) {
+                const data = doc.data();
+                if (data.targetUser === currentUserName && data.sender !== currentUserName) {
+                    sendPushNotification("🗣️ スレへの招待が届いたぞ！", `${data.sender}が君を待ってる！`);
+                }
+            }
+        });
+    }
+
     function showLoginPage() {
         document.getElementById('root').innerHTML = `
             <h1>ShoBBS</h1>
@@ -310,11 +360,10 @@
                 <button onclick="login()">ログイン</button>
             </div>
             <div style="text-align:center; margin-top:25px; border-top:1px solid rgba(255,255,255,0.05); padding-top:15px;">
-                <p style="font-size:0.8em; color:var(--sub-text);">【アカウント申請】</p>
+                <p style="font-size:0.8em; color:var(--sub-text);">【利用申請】</p>
                 <input type="text" id="regId" placeholder="希望ユーザーID">
                 <input type="password" id="regPin" placeholder="希望PINコード">
-                <input type="text" id="inviteBy" placeholder="招待してくれた人のID（任意）">
-                <button onclick="register()" class="btn-small" style="width:100%; margin-top:5px;">申請を送る</button>
+                <button onclick="register()" class="btn-small" style="width:100%; margin-top:5px;">アカウント申請</button>
             </div>`;
     }
 
@@ -336,10 +385,9 @@
     async function register() {
         const id = document.getElementById('regId').value;
         const pin = document.getElementById('regPin').value;
-        const invite = document.getElementById('inviteBy').value || "なし";
         if(!id || !pin) return alert("IDとPINを入力してください");
-        await db.collection("requests").add({ userId: id, pin: pin, inviteBy: invite, isApproved: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-        alert("申請完了！通知がadminへ送信されました。");
+        await db.collection("requests").add({ userId: id, pin: pin, isApproved: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        alert("申請完了！");
     }
 
     async function keepAlive() {
@@ -361,7 +409,6 @@
         if(unsubscribeMembers) unsubscribeMembers();
         if(unsubscribeNotice) unsubscribeNotice();
         if(unsubscribeCalls) unsubscribeCalls();
-        if(unsubscribeRequests) unsubscribeRequests();
         await updatePresence(null);
         currentThreadId = null;
         leaveCall();
@@ -373,52 +420,41 @@
                 <button onclick="updateNotice()" class="btn-small btn-pink" style="color:#fff;">更新</button>
             </div>` : "";
 
+        let showPushBanner = (window.Notification && Notification.permission !== "granted") ? 'block' : 'none';
+
         document.getElementById('root').innerHTML = `
             <div class="nav">
                 ${adminBtn}
                 <button class="btn-small" onclick="location.reload()">ログアウト</button>
             </div>
             
+            <div id="push-banner-area" class="push-banner" style="display:${showPushBanner};">
+                <span>スマホ画面にShoBBSの通知を飛ばす？</span>
+                <button class="btn-small" style="background:var(--accent); color:#000;" onclick="requestNotificationPermission()">通知をONにする</button>
+            </div>
+
             <div id="stories-area" class="stories-container"></div>
             
-            <div id="inviteAlert" class="alert-banner"></div>
-
             <h1>ShoBBS</h1>
             
             <div class="form-area">
                 <input type="text" id="newThreadTitle" placeholder="コミュニティのタイトル（スレタイ）">
-                <textarea id="firstPost" placeholder="みんなに共有したいこと..."></textarea>
-                <button onclick="createThread()">コミュニティに投稿する</button>
+                <textarea id="firstPost" placeholder="最初の投稿内容..."></textarea>
+                <button onclick="createThread()">コミュニティを作成</button>
             </div>
             <div class="notice-area">
                 <div class="notice-title">📢 NOTICE BOARD</div>
                 <div id="notice-text-content" class="notice-text">お知らせ読み込み中...</div>
                 ${adminNoticeForm}
             </div>
-            <div id="list-area">コミュニティ読み込み中...</div>`;
+            <div id="list-area">読み込み中...</div>`;
         
-        // ★ リアルタイム招待通知
-        if (currentUserName === ADMIN_USER_ID) {
-            unsubscribeRequests = db.collection("requests").where("isApproved", "==", false).onSnapshot(ss => {
-                const banner = document.getElementById("inviteAlert");
-                if (!banner) return;
-                if (!ss.empty) {
-                    const r = ss.docs[0].data();
-                    banner.innerText = `🔔 【招待通知】${r.userId} が [招待者: ${r.inviteBy}] で参加申請！承認してね！`;
-                    banner.style.display = "block";
-                } else { banner.style.display = "none"; }
-            });
-        }
-
-        // 📸 インスタ風オンラインストーリー表示のリアルタイム生成
         unsubscribeMembers = db.collection("users_status").onSnapshot(statusSnap => {
             const onlineUsers = new Set();
             const now = Date.now();
             statusSnap.forEach(doc => {
                 const data = doc.data();
-                if (data.lastActive && (now - data.lastActive.toMillis() < 120000)) {
-                    onlineUsers.add(doc.id);
-                }
+                if (data.lastActive && (now - data.lastActive.toMillis() < 120000)) { onlineUsers.add(doc.id); }
             });
 
             db.collection("requests").where("isApproved", "==", true).get().then(snap => {
@@ -426,7 +462,6 @@
                 if(!area) return;
                 area.innerHTML = "";
                 
-                // 自分を先頭に表示
                 const sortedUsers = [];
                 snap.forEach(doc => {
                     const uId = doc.data().userId;
@@ -476,7 +511,6 @@
                         const delBtn = canDelete ? `<span class="del-btn" onclick="event.stopPropagation(); deleteThread('${doc.id}')">🗑️</span>` : "";
                         const talkersText = talkers.length > 0 ? `<span class="talkers-count">🗣️ 通話中: ${talkers.join(", ")}</span>` : "";
 
-                        // 🟢 ミーバースを意識したすっきりかつ見やすいカード
                         area.innerHTML += `
                             <div class="thread-item" onclick="showThreadDetail('${doc.id}', '${data.title.replace(/'/g, "\\'")}')">
                                 <div style="flex-grow: 1;">
@@ -506,26 +540,70 @@
         await db.collection("threads").doc(threadId).delete();
     }
 
+    async function sendInviteNotification(threadTitle) {
+        const target = document.getElementById("inviteTargetSelect").value;
+        if (target === "none") return alert("メンバーを選んでね");
+        
+        await db.collection("system").doc("invites").set({
+            sender: currentUserName,
+            targetUser: target,
+            threadTitle: threadTitle,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert(`${target} へ招待を送信しました！`);
+    }
+
+    function copyInviteLink() {
+        const dummy = document.createElement('input');
+        document.body.appendChild(dummy);
+        dummy.value = window.location.href;
+        dummy.select();
+        document.execCommand('copy');
+        document.body.removeChild(dummy);
+        alert("招待リンクをコピーしました！");
+    }
+
     async function showThreadDetail(id, title) {
         if(unsubscribeThreads) unsubscribeThreads();
         if(unsubscribePosts) unsubscribePosts();
         if(unsubscribeMembers) unsubscribeMembers();
         if(unsubscribeNotice) unsubscribeNotice();
         if(unsubscribeCalls) unsubscribeCalls();
-        if(unsubscribeRequests) unsubscribeRequests();
         await updatePresence(id);
         currentThreadId = id;
         
         document.getElementById('root').innerHTML = `
-            <div class="nav"><button class="btn-small" onclick="showThreadList()">コミュニティ一覧に戻る</button></div>
+            <div class="nav"><button class="btn-small" onclick="showThreadList()">一覧に戻る</button></div>
             <h1 style="font-size:1.3em; text-align:left; color:#fff; text-shadow:none; margin-bottom:5px;">${title}</h1>
+            
+            <div class="form-area" style="padding:10px; margin-bottom:15px; background:rgba(255, 0, 127, 0.02); border-color:var(--pink);">
+                <span style="font-size:0.8em; color:var(--pink); font-weight:bold;">✉️ このスレにメンバーを直接招待</span>
+                <div style="display:flex; gap:5px; margin-top:5px;">
+                    <select id="inviteTargetSelect" style="margin:0; padding:6px; font-size:0.85em;"></select>
+                    <button class="btn-small btn-pink" style="color:#fff;" onclick="sendInviteNotification('${title.replace(/'/g, "\\'")}')">通知で呼ぶ</button>
+                    <button class="btn-small" style="background:#22c55e; color:#fff;" onclick="copyInviteLink()">LINE用リンク</button>
+                </div>
+            </div>
+
             <div id="call-status-area"><div>● 通話中: <span id="online-users" style="color:var(--accent); font-weight:bold;">あなたのみ</span></div></div>
             <div style="display:flex; gap:10px; margin-bottom:15px;">
                 <button id="join-btn" onclick="joinCall('${id}')">通話に参加</button>
                 <button id="leave-btn" style="display:none; background:linear-gradient(90deg, #ef4444, #dc2626);" onclick="leaveCall()">通話を終了</button>
             </div>
-            <div class="form-area"><textarea id="replyText" rows="3" placeholder="共感のコメントを話そう..."></textarea><button onclick="sendReply()">コメントを投稿</button></div>
+            <div class="form-area"><textarea id="replyText" rows="3" placeholder="コメントを投稿..."></textarea><button onclick="sendReply()">コメントを投稿</button></div>
             <div id="post-area"></div>`;
+
+        db.collection("requests").where("isApproved", "==", true).get().then(snap => {
+            const select = document.getElementById("inviteTargetSelect");
+            if(!select) return;
+            select.innerHTML = '<option value="none">メンバーを選択...</option>';
+            snap.forEach(doc => {
+                const uId = doc.data().userId;
+                if(uId !== currentUserName) {
+                    select.innerHTML += `<option value="${uId}">${uId}</option>`;
+                }
+            });
+        });
 
         unsubscribePosts = db.collection("posts").where("threadId", "==", id).onSnapshot(ss => {
             const area = document.getElementById('post-area');
@@ -538,10 +616,11 @@
                 const delBtn = (currentUserName === ADMIN_USER_ID) ? `<span class="del-btn" onclick="deletePost('${p.id}')">×</span>` : "";
                 const likes = p.likes || [];
                 const isLiked = likes.includes(currentUserName);
-                const likersText = likes.length > 0 ? `<span class="likers-list">⚡ ${likes.length} 人がそうだね！しました</span>` : "";
+                
+                // 👀 「そうだね！」から「既読（チェックした人の一覧）」へ変更
+                const likersText = likes.length > 0 ? `<span class="likers-list">👀 ${likes.join(", ")} が既読</span>` : "";
                 const miniInt = p.user.substring(0,2).toUpperCase();
 
-                // 💬 ミーバース風吹き出しコメントスタイル
                 area.innerHTML += `
                     <div class="post">
                         <div class="post-info">
@@ -553,7 +632,7 @@
                         <div class="post-footer">
                             ${likersText}
                             <button class="glow-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${p.id}', ${JSON.stringify(likes).replace(/"/g, '&quot;')})">
-                                ⚡ そうだね！ (${likes.length})
+                                👀 見たよ (${likes.length})
                             </button>
                         </div>
                     </div>`;
@@ -582,7 +661,6 @@
                 if (mediaType === "audio") user.audioTrack.play();
                 updateOnlineUsers();
             });
-            client.on("user-left", () => updateOnlineUsers());
             localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
             await client.publish([localAudioTrack]);
             document.getElementById('join-btn').style.display = 'none';
@@ -614,7 +692,6 @@
         if(unsubscribeMembers) unsubscribeMembers();
         if(unsubscribeNotice) unsubscribeNotice();
         if(unsubscribeCalls) unsubscribeCalls();
-        if(unsubscribeRequests) unsubscribeRequests();
         
         document.getElementById('root').innerHTML = `
             <div class="nav"><button class="btn-small" onclick="showThreadList()">戻る</button></div>
@@ -630,10 +707,7 @@
                 const r = doc.data();
                 area.innerHTML += `
                     <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
-                        <div>
-                            <span>ID: <b>${r.userId}</b></span><br>
-                            <span style="font-size:0.8em; color:var(--pink);">招待者: ${r.inviteBy || 'なし'}</span>
-                        </div>
+                        <span>ID: <b>${r.userId}</b></span>
                         <button class="btn-small" style="background:var(--accent); color:#000;" onclick="approveUser('${doc.id}')">承認する</button>
                     </div>`;
             });
