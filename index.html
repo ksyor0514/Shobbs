@@ -3,28 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ShoBBS</title>
-    <link class="apple-touch-icon" rel="apple-touch-icon" href="https://chromebookuser0001-cyber.github.io/sho-/shophoto.jpg">
+    <title>ShoBBS - Miiverse & Insta Edition</title>
+    <link rel="apple-touch-icon" href="https://chromebookuser0001-cyber.github.io/sho-/shophoto.jpg">
     <link rel="icon" href="https://chromebookuser0001-cyber.github.io/sho-/shophoto.jpg">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="ShoBBS">
     <style>
         :root { 
-            --bg: #05050a; 
-            --card: #0d0d1a; 
+            --bg: #060610; 
+            --card: #101026; 
             --accent: #00f0ff; 
             --pink: #ff007f;
             --green: #39ff14;
-            --text: #e0e0ff; 
-            --border: #00f0ff;
-            --sub-text: #8a8aaf;
+            --text: #e2e2ff; 
+            --border: rgba(0, 240, 255, 0.25);
+            --sub-text: #7c7ca3;
         }
         body { 
             background-color: var(--bg); 
             color: var(--text); 
-            font-family: 'Courier New', sans-serif; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
             margin: 0; 
-            padding: 15px; 
+            padding: 10px; 
             display: flex; 
             justify-content: center; 
             min-height: 100vh; 
@@ -32,159 +32,227 @@
         }
         .container { 
             width: 100%; 
-            max-width: 700px; 
+            max-width: 650px; 
             background: var(--card); 
-            border: 2px solid var(--border); 
-            min-height: 90vh; 
-            padding: 24px; 
+            border: 1px solid var(--border); 
+            min-height: 95vh; 
+            padding: 15px; 
             box-sizing: border-box; 
-            border-radius: 16px; 
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2), inset 0 0 15px rgba(0, 240, 255, 0.1); 
+            border-radius: 24px; 
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.05);
         }
         h1 { 
             text-align: center; 
             color: var(--accent); 
-            letter-spacing: 6px; 
-            margin-bottom: 24px; 
-            font-size: 2.2em; 
-            text-shadow: 0 0 10px var(--accent), 0 0 20px rgba(0, 240, 255, 0.5);
+            letter-spacing: 2px; 
+            margin: 10px 0 20px 0; 
+            font-size: 1.8em; 
+            font-weight: 800;
+            text-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
         }
+
+        /* 📸 インスタ風ストーリーズ・オンラインエリア */
+        .stories-container {
+            display: flex;
+            gap: 14px;
+            overflow-x: auto;
+            padding: 10px 5px 15px 5px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .stories-container::-webkit-scrollbar { display: none; } /* スクロールバー非表示 */
+        
+        .story-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.75em;
+            color: var(--text);
+            min-width: 60px;
+            text-align: center;
+        }
+        .story-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: #1a1a3a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            color: var(--accent);
+            margin-bottom: 6px;
+            border: 2px solid #333;
+            box-sizing: border-box;
+            position: relative;
+        }
+        /* オンラインの時はインスタ風のグラデーションリングが光る */
+        .story-item.online .story-avatar {
+            border: 2px solid transparent;
+            background-image: linear-gradient(#101026, #101026), linear-gradient(135deg, var(--pink), var(--accent));
+            background-origin: border-box;
+            background-clip: content-box, border-box;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+        .story-item.online .story-avatar::after {
+            content: "";
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 10px;
+            height: 10px;
+            background: var(--green);
+            border-radius: 50%;
+            border: 2px solid var(--card);
+        }
+
+        /* 🔔 招待通知用バナー */
+        .alert-banner {
+            background: rgba(255, 0, 127, 0.15);
+            border: 1px solid var(--pink);
+            color: #fff;
+            padding: 12px;
+            border-radius: 14px;
+            margin-bottom: 15px;
+            font-size: 0.85em;
+            font-weight: bold;
+            display: none;
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.2);
+        }
+
+        /* 🟢 ミーバース（Miiverse）風スレッド・投稿カード */
         .thread-item { 
-            padding: 18px; 
-            border: 1px solid rgba(0, 240, 255, 0.3); 
+            background: rgba(255, 255, 255, 0.02); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            padding: 16px; 
             margin-bottom: 12px; 
             cursor: pointer; 
-            transition: 0.3s; 
-            background: rgba(0, 240, 255, 0.02); 
-            border-radius: 8px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
+            transition: all 0.2s ease; 
+            border-radius: 16px; 
         }
         .thread-item:hover { 
-            border-color: var(--pink); 
-            background: rgba(255, 0, 127, 0.05); 
-            box-shadow: 0 0 10px rgba(255, 0, 127, 0.3);
+            border-color: var(--accent); 
+            background: rgba(0, 240, 255, 0.02);
+            transform: scale(0.99);
         }
+        .thread-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75em;
+            color: var(--sub-text);
+            margin-bottom: 6px;
+        }
+
         .form-area { 
-            background: rgba(13, 13, 26, 0.8); 
-            border: 1px solid rgba(0, 240, 255, 0.4); 
-            padding: 18px; 
-            margin-bottom: 24px; 
-            border-radius: 8px; 
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
+            background: rgba(255, 255, 255, 0.01); 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+            padding: 16px; 
+            margin-bottom: 20px; 
+            border-radius: 18px; 
         }
         .notice-area {
-            border: 2px solid var(--pink);
-            background: rgba(255, 0, 127, 0.02);
-            padding: 15px;
-            margin-bottom: 24px;
-            border-radius: 8px;
-            box-shadow: 0 0 15px rgba(255, 0, 127, 0.15), inset 0 0 10px rgba(255, 0, 127, 0.05);
+            border: 1px solid var(--pink);
+            background: rgba(255, 0, 127, 0.01);
+            padding: 14px;
+            margin-bottom: 20px;
+            border-radius: 16px;
         }
         .notice-title {
             color: var(--pink);
             font-weight: bold;
-            font-size: 1.1em;
-            margin-bottom: 8px;
-            text-shadow: 0 0 8px var(--pink);
-            display: flex;
-            align-items: center;
-            gap: 5px;
+            font-size: 0.9em;
+            margin-bottom: 6px;
+            text-shadow: 0 0 5px var(--pink);
         }
+
         input, textarea { 
             width: 100%; 
             padding: 12px; 
-            margin: 8px 0; 
-            background: #05050a; 
+            margin: 6px 0; 
+            background: #090918; 
             color: #fff; 
-            border: 1px solid rgba(0, 240, 255, 0.5); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
             box-sizing: border-box; 
-            border-radius: 6px; 
-            font-size: 16px; 
+            border-radius: 12px; 
+            font-size: 15px; 
             outline: none; 
-            transition: 0.3s;
         }
-        input:focus, textarea:focus {
-            border-color: var(--pink);
-            box-shadow: 0 0 8px rgba(255, 0, 127, 0.5);
-        }
+        input:focus, textarea:focus { border-color: var(--accent); }
+        
         button { 
             width: 100%; 
             padding: 12px; 
-            border: 2px solid var(--accent); 
-            background: transparent; 
-            color: var(--accent); 
-            border-radius: 6px; 
+            border: none; 
+            background: linear-gradient(90deg, #00c6ff, #0072ff); 
+            color: #fff; 
+            border-radius: 12px; 
             font-weight: bold; 
             cursor: pointer; 
-            transition: 0.2s; 
-            margin-top: 8px; 
-            text-shadow: 0 0 5px var(--accent);
-            box-shadow: 0 0 5px rgba(0, 240, 255, 0.2);
+            font-size: 15px;
+            transition: opacity 0.2s;
         }
-        button:hover { 
-            background: var(--accent); 
-            color: #05050a; 
-            box-shadow: 0 0 15px var(--accent);
-            text-shadow: none;
-        }
-        .btn-pink {
-            border-color: var(--pink);
-            color: var(--pink);
-            text-shadow: 0 0 5px var(--pink);
-        }
-        .btn-pink:hover {
-            background: var(--pink);
-            color: #05050a;
-            box-shadow: 0 0 15px var(--pink);
-        }
+        button:hover { opacity: 0.9; }
+        .btn-pink { background: linear-gradient(90deg, #ff007f, #ff0055); }
+
+        /* 💬 ミーバース風 投稿吹き出しボックス */
         .post { 
-            border-left: 3px solid var(--accent); 
-            padding: 12px 16px; 
-            margin-bottom: 16px; 
-            background: rgba(255,255,255,0.01); 
-            border-radius: 0 8px 8px 0; 
-            position: relative;
-            border-image: linear-gradient(to bottom, var(--accent), var(--pink)) 1 100%;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 14px; 
+            margin-bottom: 14px; 
+            border-radius: 16px; 
         }
-        .post-info { color: var(--sub-text); font-size: 0.8em; margin-bottom: 4px; display: flex; justify-content: space-between; }
-        .post-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
-        .glow-btn {
-            background: transparent;
+        .post-info { 
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent); 
+            font-size: 0.85em; 
+            font-weight: bold;
+            margin-bottom: 8px; 
+        }
+        .post-avatar-mini {
+            width: 24px;
+            height: 24px;
+            background: #1a1a3a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
             border: 1px solid var(--accent);
-            color: var(--accent);
-            padding: 4px 10px;
+        }
+        .post-body {
+            font-size: 0.95em;
+            color: #fff;
+            padding-left: 4px;
+        }
+        .post-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.03); padding-top: 8px;}
+
+        .glow-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: none;
+            color: var(--sub-text);
+            padding: 4px 12px;
             font-size: 0.8em;
-            border-radius: 4px;
+            border-radius: 14px;
             cursor: pointer;
-            transition: 0.3s;
             width: auto;
             margin: 0;
-            text-shadow: 0 0 3px var(--accent);
         }
         .glow-btn.liked {
-            border-color: var(--pink);
             color: var(--pink);
-            text-shadow: 0 0 8px var(--pink);
-            box-shadow: 0 0 8px rgba(255, 0, 127, 0.4);
+            background: rgba(255, 0, 127, 0.08);
         }
-        .likers-list {
-            font-size: 0.7em;
-            color: var(--sub-text);
-        }
-        .nav { display: flex; justify-content: flex-end; margin-bottom: 15px; gap: 10px; flex-wrap: wrap; }
-        .btn-small { width: auto; padding: 6px 12px; font-size: 0.75em; margin: 0; }
-        .admin-btn { border-color: var(--pink); color: var(--pink); text-shadow: 0 0 5px var(--pink); }
-        .admin-btn:hover { background: var(--pink); color: #fff; box-shadow: 0 0 10px var(--pink); }
-        .del-btn { color: var(--pink); cursor: pointer; font-weight: bold; padding: 0 5px; margin-left: 10px; text-shadow: 0 0 5px var(--pink); }
-        #call-status-area { margin-bottom: 15px; padding: 12px; background: rgba(0, 240, 255, 0.05); border: 1px dashed var(--border); border-radius: 8px; font-size: 0.85em; display: none; box-shadow: 0 0 10px rgba(0, 240, 255, 0.2); }
-        .view-count { font-size: 0.8em; color: var(--accent); text-shadow: 0 0 5px var(--accent); margin-right: 10px; }
-        .talkers-count { font-size: 0.8em; color: var(--green); text-shadow: 0 0 5px var(--green); }
-        .member-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid rgba(0, 240, 255, 0.2); }
-        .status-online { color: var(--green); font-weight: bold; text-shadow: 0 0 8px var(--green); }
-        .status-offline { color: var(--sub-text); }
-        .notice-text { color: #fff; font-size: 0.95em; white-space: pre-wrap; word-break: break-all; }
+        .likers-list { font-size: 0.75em; color: var(--sub-text); }
+        .nav { display: flex; justify-content: flex-end; margin-bottom: 15px; gap: 6px; }
+        .btn-small { width: auto; padding: 5px 12px; font-size: 0.75em; margin: 0; background: rgba(255,255,255,0.05); }
+        .del-btn { color: var(--sub-text); cursor: pointer; margin-left: auto; font-size: 0.9em; }
+        #call-status-area { margin-bottom: 12px; padding: 10px; background: rgba(0, 240, 255, 0.02); border: 1px dashed var(--accent); border-radius: 12px; font-size: 0.85em; display: none; }
+        .view-count { font-size: 0.8em; color: var(--sub-text); }
+        .talkers-count { font-size: 0.8em; color: var(--green); font-weight: bold; margin-top: 4px; display: block;}
+        .notice-text { color: #fff; font-size: 0.9em; white-space: pre-wrap; }
     </style>
 </head>
 <body>
@@ -198,7 +266,7 @@
     let currentUserName = "";
     let currentThreadId = null;
     let db, client, localAudioTrack;
-    let unsubscribeThreads = null, unsubscribePosts = null, unsubscribePresence = null, unsubscribeMembers = null, unsubscribeNotice = null, unsubscribeCalls = null;
+    let unsubscribeThreads = null, unsubscribePosts = null, unsubscribePresence = null, unsubscribeMembers = null, unsubscribeNotice = null, unsubscribeCalls = null, unsubscribeRequests = null;
     let keepAliveInterval = null;
 
     const firebaseConfig = {
@@ -234,7 +302,20 @@
     }
 
     function showLoginPage() {
-        document.getElementById('root').innerHTML = `<h1>ShoBBS</h1><div class="form-area"><input type="text" id="loginId" placeholder="ユーザーID"><input type="password" id="pinCode" placeholder="PINコード"><button onclick="login()">ログイン</button></div><div style="text-align:center;"><input type="text" id="regId" placeholder="新規ID"><input type="password" id="regPin" placeholder="新規PIN"><button onclick="register()" class="btn-small">利用申請を送る</button></div>`;
+        document.getElementById('root').innerHTML = `
+            <h1>ShoBBS</h1>
+            <div class="form-area">
+                <input type="text" id="loginId" placeholder="ユーザーID">
+                <input type="password" id="pinCode" placeholder="PINコード">
+                <button onclick="login()">ログイン</button>
+            </div>
+            <div style="text-align:center; margin-top:25px; border-top:1px solid rgba(255,255,255,0.05); padding-top:15px;">
+                <p style="font-size:0.8em; color:var(--sub-text);">【アカウント申請】</p>
+                <input type="text" id="regId" placeholder="希望ユーザーID">
+                <input type="password" id="regPin" placeholder="希望PINコード">
+                <input type="text" id="inviteBy" placeholder="招待してくれた人のID（任意）">
+                <button onclick="register()" class="btn-small" style="width:100%; margin-top:5px;">申請を送る</button>
+            </div>`;
     }
 
     async function login() {
@@ -255,9 +336,10 @@
     async function register() {
         const id = document.getElementById('regId').value;
         const pin = document.getElementById('regPin').value;
-        if(!id || !pin) return;
-        await db.collection("requests").add({ userId: id, pin: pin, isApproved: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-        alert("申請しました。adminの承認を待ってください。");
+        const invite = document.getElementById('inviteBy').value || "なし";
+        if(!id || !pin) return alert("IDとPINを入力してください");
+        await db.collection("requests").add({ userId: id, pin: pin, inviteBy: invite, isApproved: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        alert("申請完了！通知がadminへ送信されました。");
     }
 
     async function keepAlive() {
@@ -279,54 +361,103 @@
         if(unsubscribeMembers) unsubscribeMembers();
         if(unsubscribeNotice) unsubscribeNotice();
         if(unsubscribeCalls) unsubscribeCalls();
+        if(unsubscribeRequests) unsubscribeRequests();
         await updatePresence(null);
         currentThreadId = null;
         leaveCall();
         
-        let adminBtn = (currentUserName === ADMIN_USER_ID) ? `<button class="btn-small admin-btn" onclick="showAdminPage()">管理画面</button>` : "";
+        let adminBtn = (currentUserName === ADMIN_USER_ID) ? `<button class="btn-small" style="color:var(--pink);" onclick="showAdminPage()">管理</button>` : "";
         let adminNoticeForm = (currentUserName === ADMIN_USER_ID) ? `
-            <div style="margin-top:10px; border-top:1px dashed rgba(255,0,127,0.3); padding-top:10px;">
-                <textarea id="noticeInput" rows="2" placeholder="管理者用お知らせ入力欄"></textarea>
-                <button onclick="updateNotice()" class="btn-small btn-pink">お知らせ更新</button>
+            <div style="margin-top:10px; border-top:1px dashed rgba(255,0,127,0.2); padding-top:10px;">
+                <textarea id="noticeInput" rows="2" placeholder="管理者用お知らせ入力"></textarea>
+                <button onclick="updateNotice()" class="btn-small btn-pink" style="color:#fff;">更新</button>
             </div>` : "";
 
         document.getElementById('root').innerHTML = `
             <div class="nav">
-                <button class="btn-small" onclick="showMembersPage()">メンバー一覧</button>
                 ${adminBtn}
                 <button class="btn-small" onclick="location.reload()">ログアウト</button>
             </div>
+            
+            <div id="stories-area" class="stories-container"></div>
+            
+            <div id="inviteAlert" class="alert-banner"></div>
+
             <h1>ShoBBS</h1>
+            
             <div class="form-area">
-                <input type="text" id="newThreadTitle" placeholder="スレタイ">
-                <textarea id="firstPost" placeholder="本文"></textarea>
-                <button onclick="createThread()">新規スレッド</button>
+                <input type="text" id="newThreadTitle" placeholder="コミュニティのタイトル（スレタイ）">
+                <textarea id="firstPost" placeholder="みんなに共有したいこと..."></textarea>
+                <button onclick="createThread()">コミュニティに投稿する</button>
             </div>
             <div class="notice-area">
                 <div class="notice-title">📢 NOTICE BOARD</div>
                 <div id="notice-text-content" class="notice-text">お知らせ読み込み中...</div>
                 ${adminNoticeForm}
             </div>
-            <div id="list-area">更新中...</div>`;
+            <div id="list-area">コミュニティ読み込み中...</div>`;
         
+        // ★ リアルタイム招待通知
+        if (currentUserName === ADMIN_USER_ID) {
+            unsubscribeRequests = db.collection("requests").where("isApproved", "==", false).onSnapshot(ss => {
+                const banner = document.getElementById("inviteAlert");
+                if (!banner) return;
+                if (!ss.empty) {
+                    const r = ss.docs[0].data();
+                    banner.innerText = `🔔 【招待通知】${r.userId} が [招待者: ${r.inviteBy}] で参加申請！承認してね！`;
+                    banner.style.display = "block";
+                } else { banner.style.display = "none"; }
+            });
+        }
+
+        // 📸 インスタ風オンラインストーリー表示のリアルタイム生成
+        unsubscribeMembers = db.collection("users_status").onSnapshot(statusSnap => {
+            const onlineUsers = new Set();
+            const now = Date.now();
+            statusSnap.forEach(doc => {
+                const data = doc.data();
+                if (data.lastActive && (now - data.lastActive.toMillis() < 120000)) {
+                    onlineUsers.add(doc.id);
+                }
+            });
+
+            db.collection("requests").where("isApproved", "==", true).get().then(snap => {
+                const area = document.getElementById("stories-area");
+                if(!area) return;
+                area.innerHTML = "";
+                
+                // 自分を先頭に表示
+                const sortedUsers = [];
+                snap.forEach(doc => {
+                    const uId = doc.data().userId;
+                    if(uId === currentUserName) sortedUsers.unshift(uId);
+                    else sortedUsers.push(uId);
+                });
+
+                sortedUsers.forEach(uId => {
+                    const isOnline = onlineUsers.has(uId);
+                    const initial = uId.substring(0, 2).toUpperCase();
+                    area.innerHTML += `
+                        <div class="story-item ${isOnline ? 'online' : ''}">
+                            <div class="story-avatar">${initial}</div>
+                            <div style="text-overflow: ellipsis; overflow: hidden; width: 60px; white-space: nowrap;">${uId === currentUserName ? 'マイ登録' : uId}</div>
+                        </div>`;
+                });
+            });
+        });
+
         unsubscribeNotice = db.collection("system").doc("notice").onSnapshot(doc => {
             const area = document.getElementById("notice-text-content");
             if (!area) return;
-            if (doc.exists) {
-                area.innerText = doc.data().text || "現在お知らせはありません。";
-                if(document.getElementById("noticeInput") && !document.getElementById("noticeInput").value) {
-                    document.getElementById("noticeInput").value = doc.data().text || "";
-                }
-            } else { area.innerText = "現在お知らせはありません。"; }
+            if (doc.exists) { area.innerText = doc.data().text || "現在お知らせはありません。"; }
         });
 
-        // 通話中メンバーの監視
         unsubscribeCalls = db.collection("active_calls").onSnapshot(callSnap => {
             const threadTalkers = {};
             callSnap.forEach(d => {
                 const cData = d.data();
                 if(!threadTalkers[cData.threadId]) threadTalkers[cData.threadId] = [];
-                threadTalkers[cData.threadId].push(d.id); // d.id はユーザーネーム
+                threadTalkers[cData.threadId].push(d.id);
             });
 
             unsubscribePresence = db.collection("presence").onSnapshot(ps => {
@@ -343,21 +474,20 @@
                         const data = doc.data();
                         const canDelete = (currentUserName === ADMIN_USER_ID || data.creator === currentUserName);
                         const delBtn = canDelete ? `<span class="del-btn" onclick="event.stopPropagation(); deleteThread('${doc.id}')">🗑️</span>` : "";
-                        
-                        // 通話メンバーのテキスト作成
-                        const talkersText = talkers.length > 0 ? `<span class="talkers-count">[🗣️ ${talkers.join(", ")}]</span>` : "";
+                        const talkersText = talkers.length > 0 ? `<span class="talkers-count">🗣️ 通話中: ${talkers.join(", ")}</span>` : "";
 
+                        // 🟢 ミーバースを意識したすっきりかつ見やすいカード
                         area.innerHTML += `
                             <div class="thread-item" onclick="showThreadDetail('${doc.id}', '${data.title.replace(/'/g, "\\'")}')">
-                                <div>
-                                    <span>${data.title}</span>
-                                    <span style="font-size:0.7em; color:var(--sub-text); margin-left:8px;">by ${data.creator || 'unknown'}</span>
+                                <div style="flex-grow: 1;">
+                                    <div class="thread-header">
+                                        <span>投稿者: ${data.creator || 'unknown'}</span>
+                                        <span class="view-count">${count > 0 ? '👀 ' + count + '人が閲覧中' : ''}</span>
+                                    </div>
+                                    <div style="font-size:1.1em; font-weight:bold; color:#fff; margin:4px 0;">${data.title}</div>
                                     ${talkersText}
                                 </div>
-                                <div>
-                                    <span class="view-count">${count > 0 ? '👀' + count : ''}</span>
-                                    ${delBtn}
-                                </div>
+                                ${delBtn}
                             </div>`;
                     });
                 });
@@ -367,18 +497,13 @@
 
     async function updateNotice() {
         const text = document.getElementById("noticeInput").value;
-        await db.collection("system").doc("notice").set({ text: text, updatedBy: currentUserName, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+        await db.collection("system").doc("notice").set({ text: text, updatedBy: currentUserName });
         alert("お知らせを更新しました！");
     }
 
     async function deleteThread(threadId) {
-        if(!confirm("このスレッドと、スレ内のすべての投稿を削除しますか？")) return;
+        if(!confirm("削除しますか？")) return;
         await db.collection("threads").doc(threadId).delete();
-        const postsSnap = await db.collection("posts").where("threadId", "==", threadId).get();
-        const batch = db.batch();
-        postsSnap.forEach(doc => batch.delete(doc.ref));
-        await batch.commit();
-        alert("スレッドを削除しました");
     }
 
     async function showThreadDetail(id, title) {
@@ -387,15 +512,19 @@
         if(unsubscribeMembers) unsubscribeMembers();
         if(unsubscribeNotice) unsubscribeNotice();
         if(unsubscribeCalls) unsubscribeCalls();
+        if(unsubscribeRequests) unsubscribeRequests();
         await updatePresence(id);
         currentThreadId = id;
         
         document.getElementById('root').innerHTML = `
-            <div class="nav"><button class="btn-small" onclick="showThreadList()">戻る</button></div>
-            <h1 style="font-size:1.2em; border:none; margin-bottom:10px; text-shadow:0 0 5px var(--accent);">${title}</h1>
+            <div class="nav"><button class="btn-small" onclick="showThreadList()">コミュニティ一覧に戻る</button></div>
+            <h1 style="font-size:1.3em; text-align:left; color:#fff; text-shadow:none; margin-bottom:5px;">${title}</h1>
             <div id="call-status-area"><div>● 通話中: <span id="online-users" style="color:var(--accent); font-weight:bold;">あなたのみ</span></div></div>
-            <div style="display:flex; gap:10px; margin-bottom:20px;"><button id="join-btn" onclick="joinCall('${id}')">通話に参加</button><button id="leave-btn" style="display:none; border-color:#f87171; color:#f87171;" onclick="leaveCall()">通話を終了</button></div>
-            <div class="form-area"><textarea id="replyText" rows="3" placeholder="コメントを書く"></textarea><button onclick="sendReply()">書き込む</button></div>
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <button id="join-btn" onclick="joinCall('${id}')">通話に参加</button>
+                <button id="leave-btn" style="display:none; background:linear-gradient(90deg, #ef4444, #dc2626);" onclick="leaveCall()">通話を終了</button>
+            </div>
+            <div class="form-area"><textarea id="replyText" rows="3" placeholder="共感のコメントを話そう..."></textarea><button onclick="sendReply()">コメントを投稿</button></div>
             <div id="post-area"></div>`;
 
         unsubscribePosts = db.collection("posts").where("threadId", "==", id).onSnapshot(ss => {
@@ -407,20 +536,24 @@
             area.innerHTML = "";
             posts.forEach(p => {
                 const delBtn = (currentUserName === ADMIN_USER_ID) ? `<span class="del-btn" onclick="deletePost('${p.id}')">×</span>` : "";
-                
-                // いいねの処理
                 const likes = p.likes || [];
                 const isLiked = likes.includes(currentUserName);
-                const likersText = likes.length > 0 ? `<span class="likers-list">Liked by ${likes.join(", ")}</span>` : "";
+                const likersText = likes.length > 0 ? `<span class="likers-list">⚡ ${likes.length} 人がそうだね！しました</span>` : "";
+                const miniInt = p.user.substring(0,2).toUpperCase();
 
+                // 💬 ミーバース風吹き出しコメントスタイル
                 area.innerHTML += `
                     <div class="post">
-                        <div class="post-info"><span>${p.user}</span>${delBtn}</div>
+                        <div class="post-info">
+                            <div class="post-avatar-mini">${miniInt}</div>
+                            <span>${p.user}</span>
+                            ${delBtn}
+                        </div>
                         <div class="post-body">${p.text}</div>
                         <div class="post-footer">
                             ${likersText}
                             <button class="glow-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${p.id}', ${JSON.stringify(likes).replace(/"/g, '&quot;')})">
-                                ⚡ ${likes.length}
+                                ⚡ そうだね！ (${likes.length})
                             </button>
                         </div>
                     </div>`;
@@ -428,73 +561,22 @@
         });
     }
 
-    // ★ いいね（Glow）のオンオフ切り替え
     async function toggleLike(postId, currentLikes) {
         let newLikes = [...currentLikes];
-        if (newLikes.includes(currentUserName)) {
-            newLikes = newLikes.filter(u => u !== currentUserName); // すでに押してたら解除
-        } else {
-            newLikes.push(currentUserName); // 押してなかったら追加
-        }
+        if (newLikes.includes(currentUserName)) { newLikes = newLikes.filter(u => u !== currentUserName); } 
+        else { newLikes.push(currentUserName); }
         await db.collection("posts").doc(postId).update({ likes: newLikes });
     }
 
     async function deletePost(postId) {
-        if(!confirm("この投稿を削除しますか？")) return;
+        if(!confirm("削除しますか？")) return;
         await db.collection("posts").doc(postId).delete();
-    }
-
-    async function showMembersPage() {
-        if(unsubscribeThreads) unsubscribeThreads();
-        if(unsubscribePosts) unsubscribePosts();
-        if(unsubscribeMembers) unsubscribeMembers();
-        if(unsubscribeNotice) unsubscribeNotice();
-        if(unsubscribeCalls) unsubscribeCalls();
-        
-        document.getElementById('root').innerHTML = `
-            <div class="nav"><button class="btn-small" onclick="showThreadList()">戻る</button></div>
-            <h1>メンバー一覧</h1>
-            <div id="member-list-area" class="form-area">読み込み中...</div>`;
-
-        unsubscribeMembers = db.collection("users_status").onSnapshot(statusSnap => {
-            const onlineUsers = {};
-            const now = Date.now();
-            statusSnap.forEach(doc => {
-                const data = doc.data();
-                if (data.lastActive) {
-                    const diff = now - data.lastActive.toMillis();
-                    if (diff < 120000) onlineUsers[doc.id] = true;
-                }
-            });
-
-            db.collection("requests").where("isApproved", "==", true).get().then(snap => {
-                const area = document.getElementById('member-list-area');
-                if(!area) return;
-                area.innerHTML = "";
-                snap.forEach(doc => {
-                    const uId = doc.data().userId;
-                    const isOnline = onlineUsers[uId] || false;
-                    const statusText = isOnline ? `<span class="status-online">🟢 オンライン</span>` : `<span class="status-offline">⚫ オフライン</span>`;
-                    area.innerHTML += `
-                        <div class="member-item">
-                            <span><b>${uId}</b> ${uId === ADMIN_USER_ID ? '<span style="color:var(--admin-color); font-size:0.8em;">[管理者]</span>' : ''}</span>
-                            ${statusText}
-                        </div>`;
-                });
-            });
-        });
     }
 
     async function joinCall(channelId) {
         try {
             await client.join(AGORA_APP_ID, channelId, null, currentUserName);
-            
-            // ★ 通話中フラグをFirebaseに書き込む
-            await db.collection("active_calls").doc(currentUserName).set({
-                threadId: channelId,
-                startedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-
+            await db.collection("active_calls").doc(currentUserName).set({ threadId: channelId, startedAt: firebase.firestore.FieldValue.serverTimestamp() });
             client.on("user-published", async (user, mediaType) => {
                 await client.subscribe(user, mediaType);
                 if (mediaType === "audio") user.audioTrack.play();
@@ -520,12 +602,7 @@
     async function leaveCall() {
         if (localAudioTrack) { localAudioTrack.stop(); localAudioTrack.close(); localAudioTrack = null; }
         await client.leave();
-        
-        // ★ 通話中フラグを消す
-        if (currentUserName) {
-            await db.collection("active_calls").doc(currentUserName).delete();
-        }
-
+        if (currentUserName) { await db.collection("active_calls").doc(currentUserName).delete(); }
         if(document.getElementById('join-btn')) document.getElementById('join-btn').style.display = 'block';
         if(document.getElementById('leave-btn')) document.getElementById('leave-btn').style.display = 'none';
         if(document.getElementById('call-status-area')) document.getElementById('call-status-area').style.display = 'none';
@@ -537,22 +614,35 @@
         if(unsubscribeMembers) unsubscribeMembers();
         if(unsubscribeNotice) unsubscribeNotice();
         if(unsubscribeCalls) unsubscribeCalls();
-        document.getElementById('root').innerHTML = `<div class="nav"><button class="btn-small" onclick="showThreadList()">戻る</button></div><h1>ユーザー承認</h1><div id="admin-list" class="form-area">読み込み中...</div>`;
+        if(unsubscribeRequests) unsubscribeRequests();
+        
+        document.getElementById('root').innerHTML = `
+            <div class="nav"><button class="btn-small" onclick="showThreadList()">戻る</button></div>
+            <h1>ユーザー承認</h1>
+            <div id="admin-list" class="form-area">読み込み中...</div>`;
+            
         db.collection("requests").where("isApproved", "==", false).onSnapshot(ss => {
             const area = document.getElementById('admin-list');
             if(!area) return;
-            if(ss.empty) { area.innerHTML = "未承認のユーザーはいません。"; return; }
+            if(ss.empty) { area.innerHTML = "未承認ユーザーはゼロです。"; return; }
             area.innerHTML = "";
             ss.forEach(doc => {
-                area.innerHTML += `<div class="req-item"><span>ID: <b>${doc.data().userId}</b></span><button class="btn-small" onclick="approveUser('${doc.id}')">承認する</button></div>`;
+                const r = doc.data();
+                area.innerHTML += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <div>
+                            <span>ID: <b>${r.userId}</b></span><br>
+                            <span style="font-size:0.8em; color:var(--pink);">招待者: ${r.inviteBy || 'なし'}</span>
+                        </div>
+                        <button class="btn-small" style="background:var(--accent); color:#000;" onclick="approveUser('${doc.id}')">承認する</button>
+                    </div>`;
             });
         });
     }
 
     async function approveUser(docId) {
-        if(!confirm("このユーザーを承認しますか？")) return;
         await db.collection("requests").doc(docId).update({ isApproved: true });
-        alert("承認完了！");
+        alert("承認しました！");
     }
 
     async function createThread() {
