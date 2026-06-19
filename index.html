@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ShoBBS - Sound Edition</title>
+    <title>VoiceHello</title>
     <link rel="apple-touch-icon" href="https://chromebookuser0001-cyber.github.io/sho-/shophoto.jpg">
     <link rel="icon" href="https://chromebookuser0001-cyber.github.io/sho-/shophoto.jpg">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="ShoBBS">
+    <meta name="apple-mobile-web-app-title" content="VoiceHello">
     <style>
         :root { 
             --bg: #060610; 
@@ -68,7 +68,7 @@
 <script>
     const AGORA_APP_ID = "1563871745f642a5a5332fe7ee3ebeba"; 
     const ADMIN_USER_ID = "admin"; 
-    const LAST_UPDATE_TIME = "2026/06/19 17:53";
+    const LAST_UPDATE_TIME = "2026/06/19 17:59";
     const SOUND_URL = "https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav";
 
     let currentUserName = "";
@@ -143,7 +143,7 @@
 
     function showLoginPage() {
         document.getElementById('root').innerHTML = `
-            <h1>ShoBBS</h1>
+            <h1>VoiceHello</h1>
             <div class="last-update-tag">最終更新: ${LAST_UPDATE_TIME}</div>
             <div class="form-area">
                 <input type="text" id="loginId" placeholder="ユーザーID">
@@ -216,7 +216,7 @@
                 <button class="btn-small" onclick="location.reload()">ログアウト</button>
             </div>
             <div id="stories-area" class="stories-container"></div>
-            <h1>ShoBBS</h1>
+            <h1>VoiceHello</h1>
             <div class="form-area">
                 <input type="text" id="newThreadTitle" placeholder="コミュニティのタイトル（スレタイ）">
                 <textarea id="firstPost" placeholder="最初の投稿内容..."></textarea>
