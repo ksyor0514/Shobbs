@@ -65,8 +65,6 @@
 <script>
     const AGORA_APP_ID = "1563871745f642a5a5332fe7ee3ebeba"; 
     const ADMIN_USER_ID = "admin"; 
-    
-    // 🔒 鍵ペア埋め込み完了！
     const VAPID_KEY = "BMq_8ECrUP5qyo6SEqdhDMiUlIQR8K07bkkb6v2-RtelsJiw6dAeosVW1l3OM6i5kBXblaDYQGtDGA6vvAOB8bc"; 
 
     let currentUserName = "";
@@ -90,8 +88,25 @@
         client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
         
         if (firebase.messaging.isSupported()) {
-            messaging = firebase.messaging();
-            navigator.serviceWorker.register('data:text/javascript,importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js","https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js");firebase.initializeApp(' + JSON.stringify(firebaseConfig) + ');const messaging=firebase.messaging();messaging.onBackgroundMessage(p=>self.registration.showNotification(p.notification.title,p.notification));');
+            try {
+                messaging = firebase.messaging();
+                // エラー対策：セパレートされたBlob URL形式でService Workerを安全に登録
+                const swCode = `
+                    importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js");
+                    importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js");
+                    firebase.initializeApp(${JSON.stringify(firebaseConfig)});
+                    const messaging = firebase.messaging();
+                    messaging.onBackgroundMessage((payload) => {
+                        self.registration.showNotification(payload.notification.title, {
+                            body: payload.notification.body,
+                            icon: "https://chromebookuser0001-cyber.github.io/sho-/shophoto.jpg"
+                        });
+                    });
+                `;
+                const blob = new Blob([swCode], { type: 'application/javascript' });
+                const blobUrl = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(blobUrl);
+            } catch(e) { console.log("Messaging init error ignored."); }
         }
 
         showLoginPage();
@@ -126,7 +141,7 @@
                     if(document.getElementById("push-banner-area")) document.getElementById("push-banner-area").style.display = "none";
                 }
             }
-        } catch (err) { alert("通知の登録に失敗しました: " + err.message); }
+        } catch (err) { alert("通知の登録に失敗しました。Webアプリ（ホーム画面追加）のままで使い込もう！"); }
     }
 
     async function triggerCloudPush(targetUser, title, body) {
@@ -286,10 +301,11 @@
                 sortedUsers.forEach(uId => {
                     const isOnline = onlineUsers.has(uId);
                     const initial = uId.substring(0, 2).toUpperCase();
+                    // 修正：自分自身であっても「マイ登録」ではなく、本来のユーザーIDを表示
                     area.innerHTML += `
                         <div class="story-item ${isOnline ? 'online' : ''}">
                             <div class="story-avatar">${initial}</div>
-                            <div style="text-overflow: ellipsis; overflow: hidden; width: 60px; white-space: nowrap;">${uId === currentUserName ? 'マイ登録' : uId}</div>
+                            <div style="text-overflow: ellipsis; overflow: hidden; width: 60px; white-space: nowrap;">${uId}</div>
                         </div>`;
                 });
             });
