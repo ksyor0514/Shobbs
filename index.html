@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VoiceHello - Status & Event Edition</title>
+    <title>VoiceHello</title>
     <link rel="apple-touch-icon" href="https://chromebookuser0001-cyber.github.io/sho-/shophoto.jpg">
     <link rel="icon" href="https://chromebookuser0001-cyber.github.io/sho-/shophoto.jpg">
     <meta name="mobile-web-app-capable" content="yes">
@@ -20,49 +20,63 @@
             --border: rgba(0, 240, 255, 0.25);
             --sub-text: #7c7ca3;
         }
-        body { background-color: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 10px; display: flex; justify-content: center; min-height: 100vh; }
-        .container { width: 100%; max-width: 650px; background: var(--card); border: 1px solid var(--border); min-height: 95vh; padding: 15px; box-sizing: border-box; border-radius: 24px; }
+        :root.light-mode {
+            --bg: #f4f6fa;
+            --card: #ffffff;
+            --accent: #0080ff;
+            --pink: #e0006c;
+            --green: #00b33c;
+            --text: #1a1a2e;
+            --border: rgba(0, 128, 255, 0.2);
+            --sub-text: #6e6e8a;
+        }
+        body { background-color: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 10px; display: flex; justify-content: center; min-height: 100vh; transition: background-color 0.3s, color 0.3s; }
+        .container { width: 100%; max-width: 650px; background: var(--card); border: 1px solid var(--border); min-height: 95vh; padding: 15px; box-sizing: border-box; border-radius: 24px; transition: background 0.3s, border-color 0.3s; }
         h1 { text-align: center; color: var(--accent); letter-spacing: 2px; margin: 10px 0 5px 0; font-size: 1.8em; font-weight: 800; text-shadow: 0 0 8px rgba(0, 240, 255, 0.4); }
+        :root.light-mode h1 { text-shadow: none; }
         .last-update-tag { text-align: center; font-size: 0.75em; color: var(--sub-text); margin-bottom: 25px; font-weight: bold; letter-spacing: 0.5px; }
-        .stories-container { display: flex; gap: 14px; overflow-x: auto; white-space: nowrap; padding: 10px 10px 15px 10px; margin-bottom: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); -webkit-overflow-scrolling: touch; }
+        .stories-container { display: flex; gap: 14px; overflow-x: auto; white-space: nowrap; padding: 10px 10px 15px 10px; margin-bottom: 15px; border-bottom: 1px solid rgba(128, 128, 128, 0.1); -webkit-overflow-scrolling: touch; }
         .stories-container::-webkit-scrollbar { height: 4px; }
         .stories-container::-webkit-scrollbar-thumb { background: rgba(0, 240, 255, 0.3); border-radius: 10px; }
         .story-item { display: flex; flex-direction: column; align-items: center; font-size: 0.75em; color: var(--text); min-width: 68px; max-width: 68px; text-align: center; position: relative; cursor: pointer; }
-        .story-avatar { width: 52px; height: 52px; border-radius: 50%; background: #1a1a3a; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2em; color: var(--accent); margin-bottom: 6px; border: 2px solid #333; box-sizing: border-box; position: relative; }
-        .story-item.online .story-avatar { border: 2px solid transparent; background-image: linear-gradient(#101026, #101026), linear-gradient(135deg, var(--pink), var(--accent)); background-origin: border-box; background-clip: content-box, border-box; box-shadow: 0 0 10px rgba(0, 240, 255, 0.3); }
+        .story-avatar { width: 52px; height: 52px; border-radius: 50%; background: #1a1a3a; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2em; color: var(--accent); margin-bottom: 6px; border: 2px solid #333; box-sizing: border-box; position: relative; background-size: cover; background-position: center; }
+        :root.light-mode .story-avatar { background-color: #e6e8f0; border-color: #ccc; }
+        .story-item.online .story-avatar { border: 2px solid transparent; background-image: linear-gradient(var(--card), var(--card)), linear-gradient(135deg, var(--pink), var(--accent)); background-origin: border-box; background-clip: content-box, border-box; box-shadow: 0 0 10px rgba(0, 240, 255, 0.3); }
         .story-item.online .story-avatar::after { content: ""; position: absolute; bottom: 2px; right: 2px; width: 10px; height: 10px; background: var(--green); border-radius: 50%; border: 2px solid var(--card); }
         .user-status-text { font-size: 0.7em; color: var(--pink); max-width: 64px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; font-style: italic; }
-        .thread-item { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); padding: 16px; margin-bottom: 12px; cursor: pointer; border-radius: 16px; position: relative; }
+        .thread-item { background: rgba(128, 128, 128, 0.04); border: 1px solid rgba(128, 128, 128, 0.15); padding: 16px; margin-bottom: 12px; cursor: pointer; border-radius: 16px; position: relative; }
         .thread-item.pulse-neon { animation: neonGlow 1.5s infinite alternate; }
-        .thread-item.event-thread { border: 1px solid var(--pink); background: rgba(255, 0, 127, 0.03); box-shadow: 0 0 8px rgba(255, 0, 127, 0.2); }
         @keyframes neonGlow { 
             0% { border-color: rgba(0, 240, 255, 0.3); box-shadow: 0 0 5px rgba(0, 240, 255, 0.1); } 
             100% { border-color: var(--accent); box-shadow: 0 0 15px rgba(0, 240, 255, 0.4); } 
         }
         .thread-header { display: flex; justify-content: space-between; font-size: 0.75em; color: var(--sub-text); margin-bottom: 6px; }
-        .form-area { background: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.05); padding: 16px; margin-bottom: 20px; border-radius: 18px; }
-        .notice-area { border: 1px solid var(--pink); background: rgba(255, 0, 127, 0.01); padding: 14px; margin-bottom: 20px; border-radius: 16px; }
+        .form-area { background: rgba(128, 128, 128, 0.02); border: 1px solid rgba(128, 128, 128, 0.1); padding: 16px; margin-bottom: 20px; border-radius: 18px; }
+        .notice-area { border: 1px solid var(--pink); background: rgba(255, 0, 127, 0.02); padding: 14px; margin-bottom: 20px; border-radius: 16px; }
         .notice-title { color: var(--pink); font-weight: bold; font-size: 0.9em; margin-bottom: 6px; text-shadow: 0 0 5px var(--pink); }
-        .event-banner { background: linear-gradient(135deg, rgba(255, 0, 127, 0.2), rgba(0, 240, 255, 0.2)); border: 1px solid var(--pink); padding: 12px; border-radius: 16px; margin-bottom: 15px; text-align: center; font-size: 0.85em; font-weight: bold; display: none; color: #fff; animation: neonGlow 2s infinite alternate; }
-        input, textarea, select { width: 100%; padding: 12px; margin: 6px 0; background: #090918; color: #fff; border: 1px solid rgba(255, 255, 255, 0.1); box-sizing: border-box; border-radius: 12px; font-size: 15px; outline: none; }
+        :root.light-mode .notice-title { text-shadow: none; }
+        input, textarea, select { width: 100%; padding: 12px; margin: 6px 0; background: rgba(0,0,0,0.2); color: var(--text); border: 1px solid rgba(128, 128, 128, 0.2); box-sizing: border-box; border-radius: 12px; font-size: 15px; outline: none; }
+        :root.light-mode input, :root.light-mode textarea, :root.light-mode select { background: #fdfdfd; }
         button { width: 100%; padding: 12px; border: none; background: linear-gradient(90deg, #00c6ff, #0072ff); color: #fff; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 15px; }
         .btn-pink { background: linear-gradient(90deg, #ff007f, #ff0055); }
-        .post { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); padding: 14px; margin-bottom: 14px; border-radius: 16px; }
+        .post { background: rgba(128, 128, 128, 0.03); border: 1px solid rgba(128, 128, 128, 0.1); padding: 14px; margin-bottom: 14px; border-radius: 16px; }
         .post-info { display: flex; align-items: center; gap: 8px; color: var(--accent); font-size: 0.85em; margin-bottom: 8px; }
-        .post-avatar-mini { width: 24px; height: 24px; background: #1a1a3a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7em; border: 1px solid var(--accent); }
-        .post-body { font-size: 0.95em; color: #fff; }
-        .post-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.03); padding-top: 8px;}
-        .glow-btn { background: rgba(255, 255, 255, 0.04); border: none; color: var(--sub-text); padding: 5px 14px; font-size: 0.8em; border-radius: 14px; cursor: pointer; font-weight: bold; }
+        .post-avatar-mini { width: 24px; height: 24px; background: #1a1a3a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7em; border: 1px solid var(--accent); background-size: cover; background-position: center; }
+        :root.light-mode .post-avatar-mini { background-color: #e6e8f0; }
+        .post-body { font-size: 0.95em; color: var(--text); white-space: pre-wrap; word-break: break-all; }
+        .post-body a { color: var(--accent); text-decoration: underline; font-weight: bold; }
+        .post-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; border-top: 1px solid rgba(128,128,128,0.1); padding-top: 8px;}
+        .glow-btn { background: rgba(128, 128, 128, 0.08); border: none; color: var(--sub-text); padding: 5px 14px; font-size: 0.8em; border-radius: 14px; cursor: pointer; font-weight: bold; }
         .glow-btn.liked { color: var(--pink); background: rgba(255, 0, 127, 0.15); box-shadow: 0 0 10px rgba(255, 0, 127, 0.3); }
         .likers-list { font-size: 0.75em; color: var(--sub-text); }
-        .nav { display: flex; justify-content: flex-end; margin-bottom: 15px; gap: 6px; align-items: center; }
-        .btn-small { width: auto; padding: 5px 12px; font-size: 0.75em; margin: 0; background: rgba(255,255,255,0.05); }
+        .nav { display: flex; justify-content: space-between; margin-bottom: 15px; gap: 6px; align-items: center; }
+        .nav-right { display: flex; gap: 6px; }
+        .btn-small { width: auto; padding: 5px 12px; font-size: 0.75em; margin: 0; background: rgba(128,128,128,0.1); color: var(--text); }
         .del-btn { color: var(--sub-text); cursor: pointer; margin-left: auto; }
         #call-status-area { margin-bottom: 12px; padding: 10px; background: rgba(0, 240, 255, 0.02); border: 1px dashed var(--accent); border-radius: 12px; font-size: 0.85em; display: none; }
         .talkers-count { font-size: 0.8em; color: var(--green); font-weight: bold; margin-top: 4px; display: block;}
-        .notice-text { color: #fff; font-size: 0.9em; white-space: pre-wrap; }
+        .notice-text { color: var(--text); font-size: 0.9em; white-space: pre-wrap; }
         .status-input-container { display: flex; gap: 6px; margin-bottom: 15px; }
-        .event-tag-inline { background: var(--pink); color: #fff; padding: 2px 6px; border-radius: 6px; font-size: 0.75em; font-weight: bold; margin-right: 6px; }
     </style>
 </head>
 <body>
@@ -73,17 +87,19 @@
 <script>
     const AGORA_APP_ID = "1563871745f642a5a5332fe7ee3ebeba"; 
     const ADMIN_USER_ID = "admin"; 
-    const LAST_UPDATE_TIME = "2026/06/19 18:04";
+    const LAST_UPDATE_TIME = "2026/06/19 18:10";
     const SOUND_URL = "https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav";
 
     let currentUserName = "";
     let currentThreadId = null;
     let db, client, localAudioTrack;
-    let unsubscribeThreads = null, unsubscribePosts = null, unsubscribePresence = null, unsubscribeMembers = null, unsubscribeNotice = null, unsubscribeStatuses = null;
+    let unsubscribeThreads = null, unsubscribePosts = null, unsubscribePresence = null, unsubscribeMembers = null, unsubscribeNotice = null, unsubscribeStatuses = null, unsubscribeAvatars = null;
     let keepAliveInterval = null;
     let originalTitle = document.title;
     let blinkInterval = null;
     let userStatuses = {};
+    let userAvatars = {};
+    let isDarkMode = true;
 
     const firebaseConfig = {
         apiKey: "AIzaSyD2-XU5R6upCUgSDJbDz7iSoEQCzrzusLk",
@@ -101,6 +117,19 @@
         showLoginPage();
         setupExitEvents();
     };
+
+    function toggleTheme() {
+        isDarkMode = !isDarkMode;
+        const rootEl = document.documentElement;
+        const themeBtn = document.getElementById("theme-toggle-btn");
+        if (!isDarkMode) {
+            rootEl.classList.add("light-mode");
+            if (themeBtn) themeBtn.innerText = "☀️ ライトモード";
+        } else {
+            rootEl.classList.remove("light-mode");
+            if (themeBtn) themeBtn.innerText = "🌙 ダークモード";
+        }
+    }
 
     function setupExitEvents() {
         document.addEventListener("visibilitychange", () => {
@@ -147,9 +176,11 @@
         document.title = originalTitle;
     }
 
-    function isEventActive() {
-        const now = new Date();
-        return now.getDay() === 5; 
+    function linkify(text) {
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        return text.replace(urlRegex, function(url) {
+            return '<a href="' + url + '" target="_blank" rel="noopener noreferrer">' + url + '</a>';
+        });
     }
 
     function showLoginPage() {
@@ -161,7 +192,7 @@
                 <input type="password" id="pinCode" placeholder="PINコード">
                 <button onclick="login()">ログイン</button>
             </div>
-            <div style="text-align:center; margin-top:25px; border-top:1px solid rgba(255,255,255,0.05); padding-top:15px;">
+            <div style="text-align:center; margin-top:25px; border-top:1px solid rgba(128,128,128,0.1); padding-top:15px;">
                 <p style="font-size:0.8em; color:var(--sub-text);">【利用申請】</p>
                 <input type="text" id="regId" placeholder="希望ユーザーID">
                 <input type="password" id="regPin" placeholder="希望PINコード">
@@ -214,6 +245,14 @@
         document.getElementById('myStatusInput').value = "";
     }
 
+    async function saveAvatar() {
+        const url = document.getElementById('myAvatarInput').value.trim();
+        if(!url) return;
+        await db.collection("avatars").doc(currentUserName).set({ url: url });
+        alert("アイコンを更新しました！");
+        document.getElementById('myAvatarInput').value = "";
+    }
+
     function showThreadList() {
         if(unsubscribeThreads) unsubscribeThreads();
         if(unsubscribePosts) unsubscribePosts();
@@ -221,36 +260,43 @@
         if(unsubscribeMembers) unsubscribeMembers();
         if(unsubscribeNotice) unsubscribeNotice();
         if(unsubscribeStatuses) unsubscribeStatuses();
+        if(unsubscribeAvatars) unsubscribeAvatars();
         updatePresence(null);
         currentThreadId = null;
         leaveCall();
         
         let adminBtn = (currentUserName === ADMIN_USER_ID) ? `<button class="btn-small" style="color:var(--pink);" onclick="showAdminPage()">管理</button>` : "";
         let adminNoticeForm = (currentUserName === ADMIN_USER_ID) ? `
-            <div style="margin-top:10px; border-top:1px dashed rgba(255,0,127,0.2); padding-top:10px;">
+            <div style="margin-top:10px; border-top:1px dashed rgba(128,128,128,0.2); padding-top:10px;">
                 <textarea id="noticeInput" rows="2" placeholder="管理者用お知らせ入力"></textarea>
                 <button onclick="updateNotice()" class="btn-small btn-pink" style="color:#fff;">更新</button>
             </div>` : "";
 
         document.getElementById('root').innerHTML = `
             <div class="nav">
-                ${adminBtn}
-                <button class="btn-small" onclick="location.reload()">ログアウト</button>
+                <button id="theme-toggle-btn" class="btn-small" onclick="toggleTheme()">${isDarkMode ? '🌙 ダークモード' : '☀️ ライトモード'}</button>
+                <div class="nav-right">
+                    ${adminBtn}
+                    <button class="btn-small" onclick="location.reload()">ログアウト</button>
+                </div>
             </div>
             <div id="stories-area" class="stories-container"></div>
-            <div class="status-input-container">
-                <input type="text" id="myStatusInput" placeholder="今なにしてる？（24時間で消える一言）" style="margin:0;">
-                <button onclick="setStatus()" class="btn-small" style="width:auto; white-space:nowrap;">更新</button>
+            
+            <div class="form-area" style="padding:12px; margin-bottom:12px;">
+                <div class="status-input-container">
+                    <input type="text" id="myStatusInput" placeholder="今なにしてる？（24時間で消える一言）" style="margin:0;">
+                    <button onclick="setStatus()" class="btn-small" style="width:auto; white-space:nowrap;">更新</button>
+                </div>
+                <div class="status-input-container" style="margin-bottom:0;">
+                    <input type="text" id="myAvatarInput" placeholder="マイアイコン画像URLを設定" style="margin:0;">
+                    <button onclick="saveAvatar()" class="btn-small" style="width:auto; white-space:nowrap;">変更</button>
+                </div>
             </div>
-            <div id="event-banner-area" class="event-banner">🎉 フライデープレミアム通話ナイト開催中！対象スレへ急げ！</div>
+
             <h1>VoiceHello</h1>
             <div class="form-area">
                 <input type="text" id="newThreadTitle" placeholder="コミュニティのタイトル（スレタイ）">
                 <textarea id="firstPost" placeholder="最初の投稿内容..."></textarea>
-                <div style="display:flex; align-items:center; gap:5px; margin: 5px 0;">
-                    <input type="checkbox" id="isEventThread" style="width:auto; margin:0;">
-                    <label for="isEventThread" style="font-size:0.85em; color:var(--pink); font-weight:bold;">金曜イベント対象スレにする</label>
-                </div>
                 <button onclick="createThread()">コミュニティを作成</button>
             </div>
             <div class="notice-area">
@@ -260,10 +306,10 @@
             </div>
             <div id="list-area">読み込み中...</div>`;
 
-        if (isEventActive()) {
-            const eb = document.getElementById("event-banner-area");
-            if (eb) eb.style.display = "block";
-        }
+        unsubscribeAvatars = db.collection("avatars").onSnapshot(ss => {
+            userAvatars = {};
+            ss.forEach(doc => { userAvatars[doc.id] = doc.data().url; });
+        });
 
         unsubscribeStatuses = db.collection("statuses").onSnapshot(ss => {
             userStatuses = {};
@@ -298,9 +344,12 @@
                     const isOnline = onlineUsers.has(uId);
                     const initial = uId.substring(0, 2).toUpperCase();
                     const statusText = userStatuses[uId] ? userStatuses[uId] : "";
+                    const avatarUrl = userAvatars[uId] || "";
+                    const bgStyle = avatarUrl ? `background-image: url('${avatarUrl}'); color:transparent;` : "";
+                    
                     area.innerHTML += `
                         <div class="story-item ${isOnline ? 'online' : ''}" onclick="promptDirectStatus('${uId}')">
-                            <div class="story-avatar">${initial}</div>
+                            <div class="story-avatar" style="${bgStyle}">${avatarUrl ? '' : initial}</div>
                             <div style="text-overflow: ellipsis; overflow: hidden; width: 68px; white-space: nowrap;">${uId}</div>
                             <div class="user-status-text">${statusText}</div>
                         </div>`;
@@ -343,19 +392,15 @@
                         const delBtn = canDelete ? `<span class="del-btn" onclick="event.stopPropagation(); deleteThread('${doc.id}')">🗑️</span>` : "";
                         const talkersText = talkers.length > 0 ? `<span class="talkers-count">🗣️ 通話中: ${talkers.join(", ")}</span>` : "";
                         const callPulseClass = talkers.length > 0 ? 'pulse-neon' : '';
-                        
-                        const isEvent = data.isEventThread && isEventActive();
-                        const eventClass = isEvent ? 'event-thread' : '';
-                        const eventTag = isEvent ? `<span class="event-tag-inline">EVENT</span>` : '';
 
                         area.innerHTML += `
-                            <div class="thread-item ${callPulseClass} ${eventClass}" onclick="showThreadDetail('${doc.id}', '${data.title.replace(/'/g, "\\'")}')">
+                            <div class="thread-item ${callPulseClass}" onclick="showThreadDetail('${doc.id}', '${data.title.replace(/'/g, "\\'")}')">
                                 <div style="flex-grow: 1;">
                                     <div class="thread-header">
                                         <span>投稿者: ${data.creator || 'unknown'}</span>
                                         <span class="view-count">${count > 0 ? '👀 ' + count + '人が閲覧中' : ''}</span>
                                     </div>
-                                    <div style="font-size:1.1em; font-weight:bold; color:#fff; margin:4px 0;">${eventTag}${data.title}</div>
+                                    <div style="font-size:1.1em; font-weight:bold; var(--text); margin:4px 0;">${data.title}</div>
                                     ${talkersText}
                                 </div>
                                 ${delBtn}
@@ -409,8 +454,11 @@
         currentThreadId = id;
         
         document.getElementById('root').innerHTML = `
-            <div class="nav"><button class="btn-small" onclick="showThreadList()">一覧に戻る</button></div>
-            <h1 style="font-size:1.3em; text-align:left; color:#fff; text-shadow:none; margin-bottom:5px;">${title}</h1>
+            <div class="nav">
+                <button id="theme-toggle-btn" class="btn-small" onclick="toggleTheme()">${isDarkMode ? '🌙 ダークモード' : '☀️ ライトモード'}</button>
+                <button class="btn-small" onclick="showThreadList()">一覧に戻る</button>
+            </div>
+            <h1 style="font-size:1.3em; text-align:left; color:var(--text); text-shadow:none; margin-bottom:5px;">${title}</h1>
             <div class="form-area" style="padding:10px; margin-bottom:15px; background:rgba(255, 0, 127, 0.02); border-color:var(--pink);">
                 <span style="font-size:0.8em; color:var(--pink); font-weight:bold;">✉️ このスレを共有</span>
                 <div style="display:flex; gap:5px; margin-top:5px;">
@@ -453,15 +501,18 @@
                 const isLiked = likes.includes(currentUserName);
                 const likersText = likes.length > 0 ? `<span class="likers-list">👀 ${likes.join(", ")} が既読</span>` : "";
                 const miniInt = p.user.substring(0,2).toUpperCase();
+                
+                const avatarUrl = userAvatars[p.user] || "";
+                const bgStyle = avatarUrl ? `background-image: url('${avatarUrl}'); color:transparent;` : "";
 
                 area.innerHTML += `
                     <div class="post">
                         <div class="post-info">
-                            <div class="post-avatar-mini">${miniInt}</div>
+                            <div class="post-avatar-mini" style="${bgStyle}">${avatarUrl ? '' : miniInt}</div>
                             <span>${p.user}</span>
                             ${delBtn}
                         </div>
-                        <div class="post-body">${p.text}</div>
+                        <div class="post-body">${linkify(p.text)}</div>
                         <div class="post-footer">
                             ${likersText}
                             <button class="glow-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${p.id}', ${JSON.stringify(likes).replace(/"/g, '&quot;')})">
@@ -533,7 +584,7 @@
             ss.forEach(doc => {
                 const r = doc.data();
                 area.innerHTML += `
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid rgba(128,128,128,0.1);">
                         <span>ID: <b>${r.userId}</b></span>
                         <button class="btn-small" style="background:var(--accent); color:#000;" onclick="approveUser('${doc.id}')">承認する</button>
                     </div>`;
@@ -549,14 +600,8 @@
     async function createThread() {
         const title = document.getElementById('newThreadTitle').value;
         const text = document.getElementById('firstPost').value;
-        const isEventThread = document.getElementById('isEventThread').checked;
         if(!title || !text) return;
-        const threadRef = await db.collection("threads").add({ 
-            title, 
-            creator: currentUserName, 
-            isEventThread: isEventThread,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp() 
-        });
+        const threadRef = await db.collection("threads").add({ title, creator: currentUserName, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         await db.collection("posts").add({ threadId: threadRef.id, user: currentUserName, text, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         showThreadDetail(threadRef.id, title);
     }
