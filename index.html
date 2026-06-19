@@ -38,7 +38,7 @@
         .form-area { background: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.05); padding: 16px; margin-bottom: 20px; border-radius: 18px; }
         .notice-area { border: 1px solid var(--pink); background: rgba(255, 0, 127, 0.01); padding: 14px; margin-bottom: 20px; border-radius: 16px; }
         .notice-title { color: var(--pink); font-weight: bold; font-size: 0.9em; margin-bottom: 6px; text-shadow: 0 0 5px var(--pink); }
-        input, textarea, select { width: 100%; padding: 12px; margin: 6px 0; background: #090918; color: #fff; border: 1px solid rgba(255, 255, 255, 0.1); box-sizing: border-box; border-radius: 12px; font-size: 15px; outline_none; }
+        input, textarea, select { width: 100%; padding: 12px; margin: 6px 0; background: #090918; color: #fff; border: 1px solid rgba(255, 255, 255, 0.1); box-sizing: border-box; border-radius: 12px; font-size: 15px; outline: none; }
         button { width: 100%; padding: 12px; border: none; background: linear-gradient(90deg, #00c6ff, #0072ff); color: #fff; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 15px; }
         .btn-pink { background: linear-gradient(90deg, #ff007f, #ff0055); }
         .post { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); padding: 14px; margin-bottom: 14px; border-radius: 16px; }
@@ -68,8 +68,8 @@
     const ADMIN_USER_ID = "admin"; 
     const VAPID_KEY = "BMq_8ECrUP5qyo6SEqdhDMiUlIQR8K07bkkb6v2-RtelsJiw6dAeosVW1l3OM6i5kBXblaDYQGtDGA6vvAOB8bc"; 
 
-    // 🕒 最終更新日時（アプデしたときにここを書き換えてね！）
-    const LAST_UPDATE_TIME = "2026/06/19 17:40";
+    // 🕒 最終更新日時
+    const LAST_UPDATE_TIME = "2026/06/19 17:50";
 
     let currentUserName = "";
     let currentThreadId = null;
@@ -184,7 +184,6 @@
     }
 
     function showLoginPage() {
-        // 🛠️ 変更点: ログイン画面に最終更新タグを追加
         document.getElementById('root').innerHTML = `
             <h1>ShoBBS</h1>
             <div class="last-update-tag">最終更新: ${LAST_UPDATE_TIME}</div>
@@ -379,7 +378,7 @@
                 if (!isFirstLoadNotice && currentUserName) {
                     db.collection("user_tokens").get().then(tokenSnap => {
                         tokenSnap.forEach(tDoc => {
-                            if(tDoc.id !== currentUserName) triggerCloudPush(tDoc.id, "📢 重要なお知らせ更新！", doc.data().text);
+                            if(tDoc.id !== currentUserName) triggerCloudPush(tDoc.id, "📢 重要お知らせ更新！", doc.data().text);
                         });
                     });
                 }
@@ -428,7 +427,7 @@
         
         document.getElementById('root').innerHTML = `
             <div class="nav"><button class="btn-small" onclick="showThreadList()">一覧に戻る</button></div>
-            h1 style="font-size:1.3em; text-align:left; color:#fff; text-shadow:none; margin-bottom:5px;">${title}</h1>
+            <h1 style="font-size:1.3em; text-align:left; color:#fff; text-shadow:none; margin-bottom:5px;">${title}</h1>
             
             <div class="form-area" style="padding:10px; margin-bottom:15px; background:rgba(255, 0, 127, 0.02); border-color:var(--pink);">
                 <span style="font-size:0.8em; color:var(--pink); font-weight:bold;">✉️ このスレにメンバーを直接招待</span>
