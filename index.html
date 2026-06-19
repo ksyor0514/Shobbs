@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ShoBBS - Cloud Push Edition</title>
+    <title>ShoBBS - Sound Edition</title>
     <link rel="apple-touch-icon" href="https://chromebookuser0001-cyber.github.io/sho-/shophoto.jpg">
     <link rel="icon" href="https://chromebookuser0001-cyber.github.io/sho-/shophoto.jpg">
-    <link rel="manifest" href="data:application/json,{'name':'ShoBBS','short_name':'ShoBBS','start_url':'/','display':'standalone','background_color':'%23060610','theme_color':'%23060610','icons':[{'src':'https://chromebookuser0001-cyber.github.io/sho-/shophoto.jpg','sizes':'192x192','type':'image/jpg'}]}">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="ShoBBS">
@@ -32,8 +31,12 @@
         .story-avatar { width: 52px; height: 52px; border-radius: 50%; background: #1a1a3a; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2em; color: var(--accent); margin-bottom: 6px; border: 2px solid #333; box-sizing: border-box; position: relative; }
         .story-item.online .story-avatar { border: 2px solid transparent; background-image: linear-gradient(#101026, #101026), linear-gradient(135deg, var(--pink), var(--accent)); background-origin: border-box; background-clip: content-box, border-box; box-shadow: 0 0 10px rgba(0, 240, 255, 0.3); }
         .story-item.online .story-avatar::after { content: ""; position: absolute; bottom: 2px; right: 2px; width: 10px; height: 10px; background: var(--green); border-radius: 50%; border: 2px solid var(--card); }
-        .push-banner { background: rgba(0, 240, 255, 0.05); border: 1px dashed var(--accent); padding: 10px; border-radius: 12px; margin-bottom: 15px; font-size: 0.8em; display: flex; justify-content: space-between; align-items: center; }
-        .thread-item { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); padding: 16px; margin-bottom: 12px; cursor: pointer; border-radius: 16px; }
+        .thread-item { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); padding: 16px; margin-bottom: 12px; cursor: pointer; border-radius: 16px; position: relative; }
+        .thread-item.pulse-neon { animation: neonGlow 1.5s infinite alternate; }
+        @keyframes neonGlow { 
+            0% { border-color: rgba(0, 240, 255, 0.3); box-shadow: 0 0 5px rgba(0, 240, 255, 0.1); } 
+            100% { border-color: var(--accent); box-shadow: 0 0 15px rgba(0, 240, 255, 0.4); } 
+        }
         .thread-header { display: flex; justify-content: space-between; font-size: 0.75em; color: var(--sub-text); margin-bottom: 6px; }
         .form-area { background: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.05); padding: 16px; margin-bottom: 20px; border-radius: 18px; }
         .notice-area { border: 1px solid var(--pink); background: rgba(255, 0, 127, 0.01); padding: 14px; margin-bottom: 20px; border-radius: 16px; }
@@ -62,20 +65,19 @@
 <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.21.0.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
 <script>
     const AGORA_APP_ID = "1563871745f642a5a5332fe7ee3ebeba"; 
     const ADMIN_USER_ID = "admin"; 
-    const VAPID_KEY = "BMq_8ECrUP5qyo6SEqdhDMiUlIQR8K07bkkb6v2-RtelsJiw6dAeosVW1l3OM6i5kBXblaDYQGtDGA6vvAOB8bc"; 
-
-    // 🕒 最終更新日時
-    const LAST_UPDATE_TIME = "2026/06/19 17:50";
+    const LAST_UPDATE_TIME = "2026/06/19 17:53";
+    const SOUND_URL = "https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav";
 
     let currentUserName = "";
     let currentThreadId = null;
-    let db, client, localAudioTrack, messaging;
-    let unsubscribeThreads = null, unsubscribePosts = null, unsubscribePresence = null, unsubscribeMembers = null, unsubscribeNotice = null, unsubscribeCalls = null;
+    let db, client, localAudioTrack;
+    let unsubscribeThreads = null, unsubscribePosts = null, unsubscribePresence = null, unsubscribeMembers = null, unsubscribeNotice = null;
     let keepAliveInterval = null;
+    let originalTitle = document.title;
+    let blinkInterval = null;
 
     const firebaseConfig = {
         apiKey: "AIzaSyD2-XU5R6upCUgSDJbDz7iSoEQCzrzusLk",
@@ -90,37 +92,19 @@
         firebase.initializeApp(firebaseConfig);
         db = firebase.firestore();
         client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
-        
-        if (firebase.messaging.isSupported()) {
-            try {
-                messaging = firebase.messaging();
-                const swCode = `
-                    importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js");
-                    importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js");
-                    firebase.initializeApp(${JSON.stringify(firebaseConfig)});
-                    const messaging = firebase.messaging();
-                    messaging.onBackgroundMessage((payload) => {
-                        self.registration.showNotification(payload.notification.title, {
-                            body: payload.notification.body,
-                            icon: "https://chromebookuser0001-cyber.github.io/sho-/shophoto.jpg"
-                        });
-                    });
-                `;
-                const blob = new Blob([swCode], { type: 'application/javascript' });
-                const blobUrl = URL.createObjectURL(blob);
-                navigator.serviceWorker.register(blobUrl);
-            } catch(e) { console.log("Messaging init error ignored."); }
-        }
-
         showLoginPage();
         setupExitEvents();
-        setupNotificationTriggers(); 
     };
 
     function setupExitEvents() {
         document.addEventListener("visibilitychange", () => {
-            if (document.visibilityState === "hidden") { goOfflineSync(); } 
-            else if (currentUserName) { keepAlive(); if (currentThreadId) updatePresence(currentThreadId); }
+            if (document.visibilityState === "hidden") { 
+                goOfflineSync(); 
+            } else if (currentUserName) { 
+                keepAlive(); 
+                stopTitleBlink();
+                if (currentThreadId) updatePresence(currentThreadId); 
+            }
         });
         window.addEventListener("beforeunload", () => { goOfflineSync(); });
     }
@@ -132,55 +116,29 @@
         db.collection("active_calls").doc(currentUserName).delete();
     }
 
-    async function requestNotificationPermission() {
-        if (!messaging) return alert("このブラウザは通知に対応していません。iPhoneはホーム画面に追加してから開いてね！");
+    function playNotificationSound() {
         try {
-            const permission = await Notification.requestPermission();
-            if (permission === "granted") {
-                const token = await messaging.getToken({ vapidKey: VAPID_KEY });
-                if (token) {
-                    await db.collection("user_tokens").doc(currentUserName).set({ token: token, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-                    alert("通知設定が完了しました！アプリを閉じても届きます。");
-                    if(document.getElementById("push-banner-area")) document.getElementById("push-banner-area").style.display = "none";
-                }
-            }
-        } catch (err) { alert("通知の登録に失敗しました。Webアプリ（ホーム画面追加）のままで使い込もう！"); }
+            const audio = new Audio(SOUND_URL);
+            audio.volume = 0.5;
+            audio.play();
+        } catch(e) { console.log("Sound play blocked"); }
     }
 
-    async function triggerCloudPush(targetUser, title, body) {
-        const doc = await db.collection("user_tokens").doc(targetUser).get();
-        if (!doc.exists) return;
-        const token = doc.data().token;
-
-        await db.collection("push_queue").add({
-            toToken: token,
-            title: title,
-            body: body,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+    function startTitleBlink() {
+        if (document.visibilityState !== "hidden" || blinkInterval) return;
+        let isAlt = false;
+        blinkInterval = setInterval(() => {
+            document.title = isAlt ? "【新着あり！】" + originalTitle : originalTitle;
+            isAlt = !isAlt;
+        }, 1000);
     }
 
-    function setupNotificationTriggers() {
-        if (!messaging) return;
-        
-        messaging.onMessage((payload) => {
-            const n = payload.notification;
-            new Notification(n.title, { body: n.body, icon: 'https://chromebookuser0001-cyber.github.io/sho-/shophoto.jpg' });
-        });
-
-        db.collection("push_queue").orderBy("createdAt", "desc").limit(1).onSnapshot(ss => {
-            if (ss.empty || !currentUserName) return;
-            db.collection("user_tokens").doc(currentUserName).get().then(myDoc => {
-                if(!myDoc.exists) return;
-                const myToken = myDoc.data().token;
-                ss.forEach(doc => {
-                    const data = doc.data();
-                    if (data.toToken === myToken && (Date.now() - data.createdAt?.toMillis() < 10000)) {
-                        new Notification(data.title, { body: data.body });
-                    }
-                });
-            });
-        });
+    function stopTitleBlink() {
+        if (blinkInterval) {
+            clearInterval(blinkInterval);
+            blinkInterval = null;
+        }
+        document.title = originalTitle;
     }
 
     function showLoginPage() {
@@ -241,7 +199,6 @@
         if(unsubscribePresence) unsubscribePresence();
         if(unsubscribeMembers) unsubscribeMembers();
         if(unsubscribeNotice) unsubscribeNotice();
-        if(unsubscribeCalls) unsubscribeCalls();
         await updatePresence(null);
         currentThreadId = null;
         leaveCall();
@@ -253,23 +210,13 @@
                 <button onclick="updateNotice()" class="btn-small btn-pink" style="color:#fff;">更新</button>
             </div>` : "";
 
-        let showPushBanner = (window.Notification && Notification.permission !== "granted") ? 'block' : 'none';
-
         document.getElementById('root').innerHTML = `
             <div class="nav">
                 ${adminBtn}
                 <button class="btn-small" onclick="location.reload()">ログアウト</button>
             </div>
-            
-            <div id="push-banner-area" class="push-banner" style="display:${showPushBanner};">
-                <span>🔔 閉じていても24時間通知を受け取る？</span>
-                <button class="btn-small" style="background:var(--accent); color:#000;" onclick="requestNotificationPermission()">通知をONにする</button>
-            </div>
-
             <div id="stories-area" class="stories-container"></div>
-            
             <h1>ShoBBS</h1>
-            
             <div class="form-area">
                 <input type="text" id="newThreadTitle" placeholder="コミュニティのタイトル（スレタイ）">
                 <textarea id="firstPost" placeholder="最初の投稿内容..."></textarea>
@@ -294,14 +241,12 @@
                 const area = document.getElementById("stories-area");
                 if(!area) return;
                 area.innerHTML = "";
-                
                 const sortedUsers = [];
                 snap.forEach(doc => {
                     const uId = doc.data().userId;
                     if(uId === currentUserName) sortedUsers.unshift(uId);
                     else sortedUsers.push(uId);
                 });
-
                 sortedUsers.forEach(uId => {
                     const isOnline = onlineUsers.has(uId);
                     const initial = uId.substring(0, 2).toUpperCase();
@@ -324,11 +269,8 @@
                     if (change.type === "added") {
                         const d = change.doc.data();
                         if(d.creator !== currentUserName) {
-                            db.collection("user_tokens").get().then(tokenSnap => {
-                                tokenSnap.forEach(tDoc => {
-                                    if(tDoc.id !== currentUserName) triggerCloudPush(tDoc.id, "🚀 新しいコミュニティが誕生！", `${d.creator}: 【${d.title}】`);
-                                });
-                            });
+                            playNotificationSound();
+                            startTitleBlink();
                         }
                     }
                 });
@@ -351,9 +293,10 @@
                         const canDelete = (currentUserName === ADMIN_USER_ID || data.creator === currentUserName);
                         const delBtn = canDelete ? `<span class="del-btn" onclick="event.stopPropagation(); deleteThread('${doc.id}')">🗑️</span>` : "";
                         const talkersText = talkers.length > 0 ? `<span class="talkers-count">🗣️ 通話中: ${talkers.join(", ")}</span>` : "";
+                        const callPulseClass = talkers.length > 0 ? 'pulse-neon' : '';
 
                         area.innerHTML += `
-                            <div class="thread-item" onclick="showThreadDetail('${doc.id}', '${data.title.replace(/'/g, "\\'")}')">
+                            <div class="thread-item ${callPulseClass}" onclick="showThreadDetail('${doc.id}', '${data.title.replace(/'/g, "\\'")}')">
                                 <div style="flex-grow: 1;">
                                     <div class="thread-header">
                                         <span>投稿者: ${data.creator || 'unknown'}</span>
@@ -369,21 +312,10 @@
             });
         });
 
-        let isFirstLoadNotice = true;
         unsubscribeNotice = db.collection("system").doc("notice").onSnapshot(doc => {
             const area = document.getElementById("notice-text-content");
             if (!area) return;
-            if (doc.exists) { 
-                area.innerText = doc.data().text || "現在お知らせはありません。"; 
-                if (!isFirstLoadNotice && currentUserName) {
-                    db.collection("user_tokens").get().then(tokenSnap => {
-                        tokenSnap.forEach(tDoc => {
-                            if(tDoc.id !== currentUserName) triggerCloudPush(tDoc.id, "📢 重要お知らせ更新！", doc.data().text);
-                        });
-                    });
-                }
-            }
-            isFirstLoadNotice = false;
+            if (doc.exists) { area.innerText = doc.data().text || "現在お知らせはありません。"; }
         });
     }
 
@@ -396,14 +328,6 @@
     async function deleteThread(threadId) {
         if(!confirm("削除しますか？")) return;
         await db.collection("threads").doc(threadId).delete();
-    }
-
-    async function sendInviteNotification(threadTitle) {
-        const target = document.getElementById("inviteTargetSelect").value;
-        if (target === "none") return alert("メンバーを選んでね");
-        
-        await triggerCloudPush(target, "🗣️ スレへの招待が届いたぞ！", `${currentUserName}が【${threadTitle}】で君を待ってる！`);
-        alert(`${target} のスマホ画面へリアルタイムプッシュ通知を送信しました！`);
     }
 
     function copyInviteLink() {
@@ -421,23 +345,18 @@
         if(unsubscribePosts) unsubscribePosts();
         if(unsubscribeMembers) unsubscribeMembers();
         if(unsubscribeNotice) unsubscribeNotice();
-        if(unsubscribeCalls) unsubscribeCalls();
         await updatePresence(id);
         currentThreadId = id;
         
         document.getElementById('root').innerHTML = `
             <div class="nav"><button class="btn-small" onclick="showThreadList()">一覧に戻る</button></div>
             <h1 style="font-size:1.3em; text-align:left; color:#fff; text-shadow:none; margin-bottom:5px;">${title}</h1>
-            
             <div class="form-area" style="padding:10px; margin-bottom:15px; background:rgba(255, 0, 127, 0.02); border-color:var(--pink);">
-                <span style="font-size:0.8em; color:var(--pink); font-weight:bold;">✉️ このスレにメンバーを直接招待</span>
+                <span style="font-size:0.8em; color:var(--pink); font-weight:bold;">✉️ このスレを共有</span>
                 <div style="display:flex; gap:5px; margin-top:5px;">
-                    <select id="inviteTargetSelect" style="margin:0; padding:6px; font-size:0.85em;"></select>
-                    <button class="btn-small btn-pink" style="color:#fff;" onclick="sendInviteNotification('${title.replace(/'/g, "\\'")}')">通知で呼ぶ</button>
-                    <button class="btn-small" style="background:#22c55e; color:#fff;" onclick="copyInviteLink()">LINE用リンク</button>
+                    <button class="btn-small" style="background:#22c55e; color:#fff; width:100%;" onclick="copyInviteLink()">LINE用リンクをコピー</button>
                 </div>
             </div>
-
             <div id="call-status-area"><div>● 通話中: <span id="online-users" style="color:var(--accent); font-weight:bold;">あなたのみ</span></div></div>
             <div style="display:flex; gap:10px; margin-bottom:15px;">
                 <button id="join-btn" onclick="joinCall('${id}')">通話に参加</button>
@@ -446,19 +365,24 @@
             <div class="form-area"><textarea id="replyText" rows="3" placeholder="コメントを投稿..."></textarea><button onclick="sendReply()">コメントを投稿</button></div>
             <div id="post-area"></div>`;
 
-        db.collection("requests").where("isApproved", "==", true).get().then(snap => {
-            const select = document.getElementById("inviteTargetSelect");
-            if(!select) return;
-            select.innerHTML = '<option value="none">メンバーを選択...</option>';
-            snap.forEach(doc => {
-                const uId = doc.data().userId;
-                if(uId !== currentUserName) { select.innerHTML += `<option value="${uId}">${uId}</option>`; }
-            });
-        });
-
+        let isFirstLoadPost = true;
         unsubscribePosts = db.collection("posts").where("threadId", "==", id).onSnapshot(ss => {
             const area = document.getElementById('post-area');
             if(!area) return;
+            
+            if (!isFirstLoadPost) {
+                ss.docChanges().forEach(change => {
+                    if (change.type === "added") {
+                        const pData = change.doc.data();
+                        if (pData.user !== currentUserName) {
+                            playNotificationSound();
+                            startTitleBlink();
+                        }
+                    }
+                });
+            }
+            isFirstLoadPost = false;
+
             let posts = [];
             ss.forEach(doc => posts.push({id: doc.id, ...doc.data()}));
             posts.sort((a, b) => (b.createdAt?.toMillis() || Date.now()) - (a.createdAt?.toMillis() || Date.now()));
