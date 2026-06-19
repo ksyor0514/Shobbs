@@ -78,6 +78,8 @@
         .talkers-count { font-size: 0.8em; color: var(--green); font-weight: bold; margin-top: 4px; display: block;}
         .notice-text { color: var(--text); font-size: 0.9em; white-space: pre-wrap; }
         .status-input-container { display: flex; gap: 6px; margin-bottom: 15px; }
+        .video-container { position: relative; width: 100%; max-width: 280px; margin: 12px auto 0 auto; aspect-ratio: 9 / 16; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
     </style>
 </head>
 <body>
@@ -88,7 +90,7 @@
 <script>
     const AGORA_APP_ID = "1563871745f642a5a5332fe7ee3ebeba"; 
     const ADMIN_USER_ID = "admin"; 
-    const LAST_UPDATE_TIME = "2026/06/19 18:20";
+    const LAST_UPDATE_TIME = "2026/06/19 18:35";
     const SOUND_URL = "https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav";
 
     let currentUserName = "";
@@ -188,6 +190,12 @@
         });
     }
 
+    function extractYouTubeId(text) {
+        const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S+\?v=)|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/;
+        const match = text.match(regex);
+        return match ? match[1] : null;
+    }
+
     async function updateReadReceipt(threadId) {
         if (!currentUserName || !threadId || document.visibilityState === "hidden") return;
         await db.collection("read_receipts").doc(`${currentThreadId}_${currentUserName}`).set({
@@ -283,7 +291,7 @@
         let adminBtn = (currentUserName === ADMIN_USER_ID) ? `<button class="btn-small" style="color:var(--pink);" onclick="showAdminPage()">管理</button>` : "";
         let adminNoticeForm = (currentUserName === ADMIN_USER_ID) ? `
             <div style="margin-top:10px; border-top:1px dashed rgba(128,128,128,0.2); padding-top:10px;">
-                <textarea id="noticeInput" rows="2" placeholder="管理者用お知らせ入力"></textarea>
+                <textarea id="noticeInput" rows="2" placeholder="管理者用お知らせ入力（YouTubeリンクも可）"></textarea>
                 <button onclick="updateNotice()" class="btn-small btn-pink" style="color:#fff;">更新</button>
             </div>` : "";
 
@@ -317,6 +325,7 @@
             <div class="notice-area">
                 <div class="notice-title">📢 NOTICE BOARD</div>
                 <div id="notice-text-content" class="notice-text">お知らせ読み込み中...</div>
+                <div id="notice-video-area"></div>
                 ${adminNoticeForm}
             </div>
             <div id="list-area">読み込み中...</div>`;
@@ -438,8 +447,22 @@
 
         unsubscribeNotice = db.collection("system").doc("notice").onSnapshot(doc => {
             const area = document.getElementById("notice-text-content");
-            if (!area) return;
-            if (doc.exists) { area.innerText = doc.data().text || "現在お知らせはありません。"; }
+            const videoArea = document.getElementById("notice-video-area");
+            if (!area || !videoArea) return;
+            if (doc.exists) { 
+                const rawText = doc.data().text || "現在お知らせはありません。";
+                area.innerHTML = linkify(rawText); 
+                
+                const ytId = extractYouTubeId(rawText);
+                if (ytId) {
+                    videoArea.innerHTML = `
+                        <div class="video-container">
+                            <iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>
+                        </div>`;
+                } else {
+                    videoArea.innerHTML = "";
+                }
+            }
         });
     }
 
@@ -573,7 +596,7 @@
                                 ${readReceiptText}
                             </div>
                             <button class="glow-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${p.id}', ${JSON.stringify(likes).replace(/"/g, '&quot;')})">
-                                👑 ❤️ (${likes.length})
+                                ❤️ (${likes.length})
                             </button>
                         </div>
                     </div>`;
