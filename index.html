@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VoiceHello</title>
-    <link rel="apple-touch-icon" href="https://chromebookuser0001-cyber.github.io/sho-/shophoto.jpg">
+    <link class="apple-touch-icon" rel="apple-touch-icon" href="https://chromebookuser0001-cyber.github.io/sho-/shophoto.jpg">
     <link rel="icon" href="https://chromebookuser0001-cyber.github.io/sho-/shophoto.jpg">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -68,7 +68,8 @@
         .post-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; border-top: 1px solid rgba(128,128,128,0.1); padding-top: 8px;}
         .glow-btn { background: rgba(128, 128, 128, 0.08); border: none; color: var(--sub-text); padding: 5px 14px; font-size: 0.8em; border-radius: 14px; cursor: pointer; font-weight: bold; }
         .glow-btn.liked { color: var(--pink); background: rgba(255, 0, 127, 0.15); box-shadow: 0 0 10px rgba(255, 0, 127, 0.3); }
-        .likers-list { font-size: 0.75em; color: var(--sub-text); }
+        .likers-list { font-size: 0.75em; color: var(--sub-text); display: flex; gap: 8px; align-items: center; }
+        .read-count { font-size: 0.8em; color: var(--accent); font-weight: bold; }
         .nav { display: flex; justify-content: space-between; margin-bottom: 15px; gap: 6px; align-items: center; }
         .nav-right { display: flex; gap: 6px; }
         .btn-small { width: auto; padding: 5px 12px; font-size: 0.75em; margin: 0; background: rgba(128,128,128,0.1); color: var(--text); }
@@ -87,18 +88,19 @@
 <script>
     const AGORA_APP_ID = "1563871745f642a5a5332fe7ee3ebeba"; 
     const ADMIN_USER_ID = "admin"; 
-    const LAST_UPDATE_TIME = "2026/06/19 18:10";
+    const LAST_UPDATE_TIME = "2026/06/19 18:20";
     const SOUND_URL = "https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav";
 
     let currentUserName = "";
     let currentThreadId = null;
     let db, client, localAudioTrack;
-    let unsubscribeThreads = null, unsubscribePosts = null, unsubscribePresence = null, unsubscribeMembers = null, unsubscribeNotice = null, unsubscribeStatuses = null, unsubscribeAvatars = null;
+    let unsubscribeThreads = null, unsubscribePosts = null, unsubscribePresence = null, unsubscribeMembers = null, unsubscribeNotice = null, unsubscribeStatuses = null, unsubscribeAvatars = null, unsubscribeReadReceipts = null;
     let keepAliveInterval = null;
     let originalTitle = document.title;
     let blinkInterval = null;
     let userStatuses = {};
     let userAvatars = {};
+    let threadReadTimes = {};
     let isDarkMode = true;
 
     const firebaseConfig = {
@@ -138,7 +140,10 @@
             } else if (currentUserName) { 
                 keepAlive(); 
                 stopTitleBlink();
-                if (currentThreadId) updatePresence(currentThreadId); 
+                if (currentThreadId) {
+                    updatePresence(currentThreadId);
+                    updateReadReceipt(currentThreadId);
+                }
             }
         });
         window.addEventListener("beforeunload", () => { goOfflineSync(); });
@@ -180,6 +185,15 @@
         const urlRegex = /(https?:\/\/[^\s]+)/g;
         return text.replace(urlRegex, function(url) {
             return '<a href="' + url + '" target="_blank" rel="noopener noreferrer">' + url + '</a>';
+        });
+    }
+
+    async function updateReadReceipt(threadId) {
+        if (!currentUserName || !threadId || document.visibilityState === "hidden") return;
+        await db.collection("read_receipts").doc(`${currentThreadId}_${currentUserName}`).set({
+            threadId: threadId,
+            user: currentUserName,
+            lastReadAt: firebase.firestore.FieldValue.serverTimestamp()
         });
     }
 
@@ -261,6 +275,7 @@
         if(unsubscribeNotice) unsubscribeNotice();
         if(unsubscribeStatuses) unsubscribeStatuses();
         if(unsubscribeAvatars) unsubscribeAvatars();
+        if(unsubscribeReadReceipts) unsubscribeReadReceipts();
         updatePresence(null);
         currentThreadId = null;
         leaveCall();
@@ -334,12 +349,23 @@
                 const area = document.getElementById("stories-area");
                 if(!area) return;
                 area.innerHTML = "";
-                const sortedUsers = [];
+                
+                const onlineList = [];
+                const offlineList = [];
+                
                 snap.forEach(doc => {
                     const uId = doc.data().userId;
-                    if(uId === currentUserName) sortedUsers.unshift(uId);
-                    else sortedUsers.push(uId);
+                    if (onlineUsers.has(uId)) {
+                        if (uId === currentUserName) onlineList.unshift(uId);
+                        else onlineList.push(uId);
+                    } else {
+                        if (uId === currentUserName) offlineList.unshift(uId);
+                        else offlineList.push(uId);
+                    }
                 });
+                
+                const sortedUsers = [...onlineList, ...offlineList];
+
                 sortedUsers.forEach(uId => {
                     const isOnline = onlineUsers.has(uId);
                     const initial = uId.substring(0, 2).toUpperCase();
@@ -450,8 +476,11 @@
         if(unsubscribeMembers) unsubscribeMembers();
         if(unsubscribeNotice) unsubscribeNotice();
         if(unsubscribeStatuses) unsubscribeStatuses();
+        if(unsubscribeReadReceipts) unsubscribeReadReceipts();
+        
         await updatePresence(id);
         currentThreadId = id;
+        await updateReadReceipt(id);
         
         document.getElementById('root').innerHTML = `
             <div class="nav">
@@ -473,11 +502,19 @@
             <div class="form-area"><textarea id="replyText" rows="3" placeholder="コメントを投稿..."></textarea><button onclick="sendReply()">コメントを投稿</button></div>
             <div id="post-area"></div>`;
 
+        unsubscribeReadReceipts = db.collection("read_receipts").where("threadId", "==", id).onSnapshot(ss => {
+            threadReadTimes = {};
+            ss.forEach(doc => {
+                const d = doc.data();
+                if(d.lastReadAt) {
+                    threadReadTimes[d.user] = d.lastReadAt.toMillis();
+                }
+            });
+            renderPosts(id);
+        });
+
         let isFirstLoadPost = true;
         unsubscribePosts = db.collection("posts").where("threadId", "==", id).onSnapshot(ss => {
-            const area = document.getElementById('post-area');
-            if(!area) return;
-            
             if (!isFirstLoadPost) {
                 ss.docChanges().forEach(change => {
                     if (change.type === "added") {
@@ -485,25 +522,43 @@
                         if (pData.user !== currentUserName) {
                             playNotificationSound();
                             startTitleBlink();
+                            updateReadReceipt(id);
                         }
                     }
                 });
             }
             isFirstLoadPost = false;
+            renderPosts(id, ss);
+        });
+    }
 
+    function renderPosts(threadId, postSnapshot) {
+        const area = document.getElementById('post-area');
+        if(!area) return;
+
+        const render = (snapshot) => {
             let posts = [];
-            ss.forEach(doc => posts.push({id: doc.id, ...doc.data()}));
+            snapshot.forEach(doc => posts.push({id: doc.id, ...doc.data()}));
             posts.sort((a, b) => (b.createdAt?.toMillis() || Date.now()) - (a.createdAt?.toMillis() || Date.now()));
             area.innerHTML = "";
+            
             posts.forEach(p => {
                 const delBtn = (currentUserName === ADMIN_USER_ID) ? `<span class="del-btn" onclick="deletePost('${p.id}')">×</span>` : "";
                 const likes = p.likes || [];
                 const isLiked = likes.includes(currentUserName);
-                const likersText = likes.length > 0 ? `<span class="likers-list">👀 ${likes.join(", ")} が既読</span>` : "";
                 const miniInt = p.user.substring(0,2).toUpperCase();
                 
                 const avatarUrl = userAvatars[p.user] || "";
                 const bgStyle = avatarUrl ? `background-image: url('${avatarUrl}'); color:transparent;` : "";
+
+                let readCount = 0;
+                const pTime = p.createdAt ? p.createdAt.toMillis() : Date.now();
+                Object.keys(threadReadTimes).forEach(u => {
+                    if(u !== p.user && threadReadTimes[u] >= pTime) {
+                        readCount++;
+                    }
+                });
+                const readReceiptText = readCount > 0 ? `<span class="read-count">既読 ${readCount}</span>` : "";
 
                 area.innerHTML += `
                     <div class="post">
@@ -514,14 +569,23 @@
                         </div>
                         <div class="post-body">${linkify(p.text)}</div>
                         <div class="post-footer">
-                            ${likersText}
+                            <div class="likers-list">
+                                ${readReceiptText}
+                            </div>
                             <button class="glow-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${p.id}', ${JSON.stringify(likes).replace(/"/g, '&quot;')})">
-                                👀 見たよ (${likes.length})
+                                👑 ❤️ (${likes.length})
                             </button>
                         </div>
                     </div>`;
             });
-        });
+        };
+
+        if (postSnapshot) {
+            window.lastPostSnapshot = postSnapshot;
+            render(postSnapshot);
+        } else if (window.lastPostSnapshot) {
+            render(window.lastPostSnapshot);
+        }
     }
 
     async function toggleLike(postId, currentLikes) {
@@ -611,6 +675,7 @@
         if(!text.trim()) return;
         await db.collection("posts").add({ threadId: currentThreadId, user: currentUserName, text, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         document.getElementById('replyText').value = "";
+        await updateReadReceipt(currentThreadId);
     }
 </script>
 </body>
