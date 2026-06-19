@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VoiceHello</title>
+    <title>VoiceHello - Status & Event Edition</title>
     <link rel="apple-touch-icon" href="https://chromebookuser0001-cyber.github.io/sho-/shophoto.jpg">
     <link rel="icon" href="https://chromebookuser0001-cyber.github.io/sho-/shophoto.jpg">
     <meta name="mobile-web-app-capable" content="yes">
@@ -27,12 +27,14 @@
         .stories-container { display: flex; gap: 14px; overflow-x: auto; white-space: nowrap; padding: 10px 10px 15px 10px; margin-bottom: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); -webkit-overflow-scrolling: touch; }
         .stories-container::-webkit-scrollbar { height: 4px; }
         .stories-container::-webkit-scrollbar-thumb { background: rgba(0, 240, 255, 0.3); border-radius: 10px; }
-        .story-item { display: flex; flex-direction: column; align-items: center; font-size: 0.75em; color: var(--text); min-width: 60px; max-width: 60px; text-align: center; }
+        .story-item { display: flex; flex-direction: column; align-items: center; font-size: 0.75em; color: var(--text); min-width: 68px; max-width: 68px; text-align: center; position: relative; cursor: pointer; }
         .story-avatar { width: 52px; height: 52px; border-radius: 50%; background: #1a1a3a; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2em; color: var(--accent); margin-bottom: 6px; border: 2px solid #333; box-sizing: border-box; position: relative; }
         .story-item.online .story-avatar { border: 2px solid transparent; background-image: linear-gradient(#101026, #101026), linear-gradient(135deg, var(--pink), var(--accent)); background-origin: border-box; background-clip: content-box, border-box; box-shadow: 0 0 10px rgba(0, 240, 255, 0.3); }
         .story-item.online .story-avatar::after { content: ""; position: absolute; bottom: 2px; right: 2px; width: 10px; height: 10px; background: var(--green); border-radius: 50%; border: 2px solid var(--card); }
+        .user-status-text { font-size: 0.7em; color: var(--pink); max-width: 64px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; font-style: italic; }
         .thread-item { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); padding: 16px; margin-bottom: 12px; cursor: pointer; border-radius: 16px; position: relative; }
         .thread-item.pulse-neon { animation: neonGlow 1.5s infinite alternate; }
+        .thread-item.event-thread { border: 1px solid var(--pink); background: rgba(255, 0, 127, 0.03); box-shadow: 0 0 8px rgba(255, 0, 127, 0.2); }
         @keyframes neonGlow { 
             0% { border-color: rgba(0, 240, 255, 0.3); box-shadow: 0 0 5px rgba(0, 240, 255, 0.1); } 
             100% { border-color: var(--accent); box-shadow: 0 0 15px rgba(0, 240, 255, 0.4); } 
@@ -41,6 +43,7 @@
         .form-area { background: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.05); padding: 16px; margin-bottom: 20px; border-radius: 18px; }
         .notice-area { border: 1px solid var(--pink); background: rgba(255, 0, 127, 0.01); padding: 14px; margin-bottom: 20px; border-radius: 16px; }
         .notice-title { color: var(--pink); font-weight: bold; font-size: 0.9em; margin-bottom: 6px; text-shadow: 0 0 5px var(--pink); }
+        .event-banner { background: linear-gradient(135deg, rgba(255, 0, 127, 0.2), rgba(0, 240, 255, 0.2)); border: 1px solid var(--pink); padding: 12px; border-radius: 16px; margin-bottom: 15px; text-align: center; font-size: 0.85em; font-weight: bold; display: none; color: #fff; animation: neonGlow 2s infinite alternate; }
         input, textarea, select { width: 100%; padding: 12px; margin: 6px 0; background: #090918; color: #fff; border: 1px solid rgba(255, 255, 255, 0.1); box-sizing: border-box; border-radius: 12px; font-size: 15px; outline: none; }
         button { width: 100%; padding: 12px; border: none; background: linear-gradient(90deg, #00c6ff, #0072ff); color: #fff; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 15px; }
         .btn-pink { background: linear-gradient(90deg, #ff007f, #ff0055); }
@@ -52,12 +55,14 @@
         .glow-btn { background: rgba(255, 255, 255, 0.04); border: none; color: var(--sub-text); padding: 5px 14px; font-size: 0.8em; border-radius: 14px; cursor: pointer; font-weight: bold; }
         .glow-btn.liked { color: var(--pink); background: rgba(255, 0, 127, 0.15); box-shadow: 0 0 10px rgba(255, 0, 127, 0.3); }
         .likers-list { font-size: 0.75em; color: var(--sub-text); }
-        .nav { display: flex; justify-content: flex-end; margin-bottom: 15px; gap: 6px; }
+        .nav { display: flex; justify-content: flex-end; margin-bottom: 15px; gap: 6px; align-items: center; }
         .btn-small { width: auto; padding: 5px 12px; font-size: 0.75em; margin: 0; background: rgba(255,255,255,0.05); }
         .del-btn { color: var(--sub-text); cursor: pointer; margin-left: auto; }
         #call-status-area { margin-bottom: 12px; padding: 10px; background: rgba(0, 240, 255, 0.02); border: 1px dashed var(--accent); border-radius: 12px; font-size: 0.85em; display: none; }
         .talkers-count { font-size: 0.8em; color: var(--green); font-weight: bold; margin-top: 4px; display: block;}
         .notice-text { color: #fff; font-size: 0.9em; white-space: pre-wrap; }
+        .status-input-container { display: flex; gap: 6px; margin-bottom: 15px; }
+        .event-tag-inline { background: var(--pink); color: #fff; padding: 2px 6px; border-radius: 6px; font-size: 0.75em; font-weight: bold; margin-right: 6px; }
     </style>
 </head>
 <body>
@@ -68,16 +73,17 @@
 <script>
     const AGORA_APP_ID = "1563871745f642a5a5332fe7ee3ebeba"; 
     const ADMIN_USER_ID = "admin"; 
-    const LAST_UPDATE_TIME = "2026/06/19 17:59";
+    const LAST_UPDATE_TIME = "2026/06/19 18:04";
     const SOUND_URL = "https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav";
 
     let currentUserName = "";
     let currentThreadId = null;
     let db, client, localAudioTrack;
-    let unsubscribeThreads = null, unsubscribePosts = null, unsubscribePresence = null, unsubscribeMembers = null, unsubscribeNotice = null;
+    let unsubscribeThreads = null, unsubscribePosts = null, unsubscribePresence = null, unsubscribeMembers = null, unsubscribeNotice = null, unsubscribeStatuses = null;
     let keepAliveInterval = null;
     let originalTitle = document.title;
     let blinkInterval = null;
+    let userStatuses = {};
 
     const firebaseConfig = {
         apiKey: "AIzaSyD2-XU5R6upCUgSDJbDz7iSoEQCzrzusLk",
@@ -141,6 +147,11 @@
         document.title = originalTitle;
     }
 
+    function isEventActive() {
+        const now = new Date();
+        return now.getDay() === 5; 
+    }
+
     function showLoginPage() {
         document.getElementById('root').innerHTML = `
             <h1>VoiceHello</h1>
@@ -193,13 +204,24 @@
         else { await ref.delete(); }
     }
 
-    async function showThreadList() {
+    async function setStatus() {
+        const text = document.getElementById('myStatusInput').value;
+        if(!text.trim()) return;
+        await db.collection("statuses").doc(currentUserName).set({
+            text: text,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        document.getElementById('myStatusInput').value = "";
+    }
+
+    function showThreadList() {
         if(unsubscribeThreads) unsubscribeThreads();
         if(unsubscribePosts) unsubscribePosts();
         if(unsubscribePresence) unsubscribePresence();
         if(unsubscribeMembers) unsubscribeMembers();
         if(unsubscribeNotice) unsubscribeNotice();
-        await updatePresence(null);
+        if(unsubscribeStatuses) unsubscribeStatuses();
+        updatePresence(null);
         currentThreadId = null;
         leaveCall();
         
@@ -216,10 +238,19 @@
                 <button class="btn-small" onclick="location.reload()">ログアウト</button>
             </div>
             <div id="stories-area" class="stories-container"></div>
+            <div class="status-input-container">
+                <input type="text" id="myStatusInput" placeholder="今なにしてる？（24時間で消える一言）" style="margin:0;">
+                <button onclick="setStatus()" class="btn-small" style="width:auto; white-space:nowrap;">更新</button>
+            </div>
+            <div id="event-banner-area" class="event-banner">🎉 フライデープレミアム通話ナイト開催中！対象スレへ急げ！</div>
             <h1>VoiceHello</h1>
             <div class="form-area">
                 <input type="text" id="newThreadTitle" placeholder="コミュニティのタイトル（スレタイ）">
                 <textarea id="firstPost" placeholder="最初の投稿内容..."></textarea>
+                <div style="display:flex; align-items:center; gap:5px; margin: 5px 0;">
+                    <input type="checkbox" id="isEventThread" style="width:auto; margin:0;">
+                    <label for="isEventThread" style="font-size:0.85em; color:var(--pink); font-weight:bold;">金曜イベント対象スレにする</label>
+                </div>
                 <button onclick="createThread()">コミュニティを作成</button>
             </div>
             <div class="notice-area">
@@ -228,7 +259,23 @@
                 ${adminNoticeForm}
             </div>
             <div id="list-area">読み込み中...</div>`;
-        
+
+        if (isEventActive()) {
+            const eb = document.getElementById("event-banner-area");
+            if (eb) eb.style.display = "block";
+        }
+
+        unsubscribeStatuses = db.collection("statuses").onSnapshot(ss => {
+            userStatuses = {};
+            const now = Date.now();
+            ss.forEach(doc => {
+                const data = doc.data();
+                if (data.createdAt && (now - data.createdAt.toMillis() < 86400000)) {
+                    userStatuses[doc.id] = data.text;
+                }
+            });
+        });
+
         unsubscribeMembers = db.collection("users_status").onSnapshot(statusSnap => {
             const onlineUsers = new Set();
             const now = Date.now();
@@ -250,10 +297,12 @@
                 sortedUsers.forEach(uId => {
                     const isOnline = onlineUsers.has(uId);
                     const initial = uId.substring(0, 2).toUpperCase();
+                    const statusText = userStatuses[uId] ? userStatuses[uId] : "";
                     area.innerHTML += `
-                        <div class="story-item ${isOnline ? 'online' : ''}">
+                        <div class="story-item ${isOnline ? 'online' : ''}" onclick="promptDirectStatus('${uId}')">
                             <div class="story-avatar">${initial}</div>
-                            <div style="text-overflow: ellipsis; overflow: hidden; width: 60px; white-space: nowrap;">${uId}</div>
+                            <div style="text-overflow: ellipsis; overflow: hidden; width: 68px; white-space: nowrap;">${uId}</div>
+                            <div class="user-status-text">${statusText}</div>
                         </div>`;
                 });
             });
@@ -294,15 +343,19 @@
                         const delBtn = canDelete ? `<span class="del-btn" onclick="event.stopPropagation(); deleteThread('${doc.id}')">🗑️</span>` : "";
                         const talkersText = talkers.length > 0 ? `<span class="talkers-count">🗣️ 通話中: ${talkers.join(", ")}</span>` : "";
                         const callPulseClass = talkers.length > 0 ? 'pulse-neon' : '';
+                        
+                        const isEvent = data.isEventThread && isEventActive();
+                        const eventClass = isEvent ? 'event-thread' : '';
+                        const eventTag = isEvent ? `<span class="event-tag-inline">EVENT</span>` : '';
 
                         area.innerHTML += `
-                            <div class="thread-item ${callPulseClass}" onclick="showThreadDetail('${doc.id}', '${data.title.replace(/'/g, "\\'")}')">
+                            <div class="thread-item ${callPulseClass} ${eventClass}" onclick="showThreadDetail('${doc.id}', '${data.title.replace(/'/g, "\\'")}')">
                                 <div style="flex-grow: 1;">
                                     <div class="thread-header">
                                         <span>投稿者: ${data.creator || 'unknown'}</span>
                                         <span class="view-count">${count > 0 ? '👀 ' + count + '人が閲覧中' : ''}</span>
                                     </div>
-                                    <div style="font-size:1.1em; font-weight:bold; color:#fff; margin:4px 0;">${data.title}</div>
+                                    <div style="font-size:1.1em; font-weight:bold; color:#fff; margin:4px 0;">${eventTag}${data.title}</div>
                                     ${talkersText}
                                 </div>
                                 ${delBtn}
@@ -317,6 +370,12 @@
             if (!area) return;
             if (doc.exists) { area.innerText = doc.data().text || "現在お知らせはありません。"; }
         });
+    }
+
+    function promptDirectStatus(uId) {
+        if(userStatuses[uId]) {
+            alert(`${uId} のステータス:\n「${userStatuses[uId]}」`);
+        }
     }
 
     async function updateNotice() {
@@ -345,6 +404,7 @@
         if(unsubscribePosts) unsubscribePosts();
         if(unsubscribeMembers) unsubscribeMembers();
         if(unsubscribeNotice) unsubscribeNotice();
+        if(unsubscribeStatuses) unsubscribeStatuses();
         await updatePresence(id);
         currentThreadId = id;
         
@@ -489,8 +549,14 @@
     async function createThread() {
         const title = document.getElementById('newThreadTitle').value;
         const text = document.getElementById('firstPost').value;
+        const isEventThread = document.getElementById('isEventThread').checked;
         if(!title || !text) return;
-        const threadRef = await db.collection("threads").add({ title, creator: currentUserName, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        const threadRef = await db.collection("threads").add({ 
+            title, 
+            creator: currentUserName, 
+            isEventThread: isEventThread,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp() 
+        });
         await db.collection("posts").add({ threadId: threadRef.id, user: currentUserName, text, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         showThreadDetail(threadRef.id, title);
     }
