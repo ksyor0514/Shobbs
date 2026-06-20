@@ -11,75 +11,90 @@
     <meta name="apple-mobile-web-app-title" content="VoiceHello">
     <style>
         :root { 
-            --bg: #060610; 
-            --card: #101026; 
+            --bg: #0b0c16; 
+            --card: #15182e; 
             --accent: #00f0ff; 
             --pink: #ff007f;
             --green: #39ff14;
             --text: #e2e2ff; 
-            --border: rgba(0, 240, 255, 0.25);
+            --border: rgba(0, 240, 255, 0.2);
             --sub-text: #7c7ca3;
+            --miiverse-orange: #ff9900;
         }
         :root.light-mode {
-            --bg: #f4f6fa;
+            --bg: #f2f4f8;
             --card: #ffffff;
-            --accent: #0080ff;
+            --accent: #0076ff;
             --pink: #e0006c;
-            --green: #00b33c;
+            --green: #00a835;
             --text: #1a1a2e;
-            --border: rgba(0, 128, 255, 0.2);
+            --border: rgba(0, 118, 255, 0.15);
             --sub-text: #6e6e8a;
         }
-        body { background-color: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 10px; display: flex; justify-content: center; min-height: 100vh; transition: background-color 0.3s, color 0.3s; }
-        .container { width: 100%; max-width: 650px; background: var(--card); border: 1px solid var(--border); min-height: 95vh; padding: 15px; box-sizing: border-box; border-radius: 24px; transition: background 0.3s, border-color 0.3s; }
-        h1 { text-align: center; color: var(--accent); letter-spacing: 2px; margin: 10px 0 5px 0; font-size: 1.8em; font-weight: 800; text-shadow: 0 0 8px rgba(0, 240, 255, 0.4); }
-        :root.light-mode h1 { text-shadow: none; }
-        .last-update-tag { text-align: center; font-size: 0.75em; color: var(--sub-text); margin-bottom: 25px; font-weight: bold; letter-spacing: 0.5px; }
-        .stories-container { display: flex; gap: 14px; overflow-x: auto; white-space: nowrap; padding: 10px 10px 15px 10px; margin-bottom: 15px; border-bottom: 1px solid rgba(128, 128, 128, 0.1); -webkit-overflow-scrolling: touch; }
-        .stories-container::-webkit-scrollbar { height: 4px; }
-        .stories-container::-webkit-scrollbar-thumb { background: rgba(0, 240, 255, 0.3); border-radius: 10px; }
-        .story-item { display: flex; flex-direction: column; align-items: center; font-size: 0.75em; color: var(--text); min-width: 68px; max-width: 68px; text-align: center; position: relative; cursor: pointer; }
-        .story-avatar { width: 52px; height: 52px; border-radius: 50%; background: #1a1a3a; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2em; color: var(--accent); margin-bottom: 6px; border: 2px solid #333; box-sizing: border-box; position: relative; background-size: cover; background-position: center; }
-        :root.light-mode .story-avatar { background-color: #e6e8f0; border-color: #ccc; }
-        .story-item.online .story-avatar { border: 2px solid transparent; background-image: linear-gradient(var(--card), var(--card)), linear-gradient(135deg, var(--pink), var(--accent)); background-origin: border-box; background-clip: content-box, border-box; box-shadow: 0 0 10px rgba(0, 240, 255, 0.3); }
-        .story-item.online .story-avatar::after { content: ""; position: absolute; bottom: 2px; right: 2px; width: 10px; height: 10px; background: var(--green); border-radius: 50%; border: 2px solid var(--card); }
-        .user-status-text { font-size: 0.7em; color: var(--pink); max-width: 64px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; font-style: italic; }
-        .thread-item { background: rgba(128, 128, 128, 0.04); border: 1px solid rgba(128, 128, 128, 0.15); padding: 16px; margin-bottom: 12px; cursor: pointer; border-radius: 16px; position: relative; }
-        .thread-item.pulse-neon { animation: neonGlow 1.5s infinite alternate; }
-        @keyframes neonGlow { 
-            0% { border-color: rgba(0, 240, 255, 0.3); box-shadow: 0 0 5px rgba(0, 240, 255, 0.1); } 
-            100% { border-color: var(--accent); box-shadow: 0 0 15px rgba(0, 240, 255, 0.4); } 
-        }
-        .thread-header { display: flex; justify-content: space-between; font-size: 0.75em; color: var(--sub-text); margin-bottom: 6px; }
-        .form-area { background: rgba(128, 128, 128, 0.02); border: 1px solid rgba(128, 128, 128, 0.1); padding: 16px; margin-bottom: 20px; border-radius: 18px; }
-        .notice-area { border: 1px solid var(--pink); background: rgba(255, 0, 127, 0.02); padding: 14px; margin-bottom: 20px; border-radius: 16px; }
-        .notice-title { color: var(--pink); font-weight: bold; font-size: 0.9em; margin-bottom: 6px; text-shadow: 0 0 5px var(--pink); }
-        :root.light-mode .notice-title { text-shadow: none; }
-        input, textarea, select { width: 100%; padding: 12px; margin: 6px 0; background: rgba(0,0,0,0.2); color: var(--text); border: 1px solid rgba(128, 128, 128, 0.2); box-sizing: border-box; border-radius: 12px; font-size: 15px; outline: none; }
+        body { background-color: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif; margin: 0; padding: 10px; display: flex; justify-content: center; min-height: 100vh; transition: background-color 0.3s, color 0.3s; }
+        .container { width: 100%; max-width: 650px; background: var(--card); border: 2px solid var(--border); min-height: 95vh; padding: 15px; box-sizing: border-box; border-radius: 28px; transition: background 0.3s, border-color 0.3s; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        
+        /* Miiverse風ヘッダー */
+        h1 { text-align: center; color: var(--accent); letter-spacing: 1px; margin: 5px 0; font-size: 1.6em; font-weight: 900; text-shadow: 0 0 6px rgba(0, 240, 255, 0.2); }
+        .last-update-tag { text-align: center; font-size: 0.7em; color: var(--sub-text); margin-bottom: 20px; font-weight: bold; }
+        
+        /* 検索・タブUI */
+        .search-bar { display: flex; gap: 6px; margin-bottom: 12px; }
+        .search-bar input { margin: 0; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 15px; border-bottom: 2px solid rgba(128,128,128,0.1); padding-bottom: 8px; }
+        .tab-btn { background: transparent; border: 2px solid transparent; color: var(--sub-text); padding: 6px 16px; border-radius: 20px; font-size: 0.85em; font-weight: bold; width: auto; cursor: pointer; transition: all 0.2s; }
+        .tab-btn.active { background: var(--accent); color: #000; border-color: var(--accent); box-shadow: 0 0 8px rgba(0,240,255,0.3); }
+        :root.light-mode .tab-btn.active { color: #fff; }
+
+        /* ストーリー */
+        .stories-container { display: flex; gap: 14px; overflow-x: auto; white-space: nowrap; padding: 5px 5px 12px 5px; margin-bottom: 15px; border-bottom: 1px solid rgba(128, 128, 128, 0.1); -webkit-overflow-scrolling: touch; }
+        .story-item { display: flex; flex-direction: column; align-items: center; font-size: 0.75em; color: var(--text); min-width: 64px; max-width: 64px; text-align: center; cursor: pointer; }
+        .story-avatar { width: 48px; height: 48px; border-radius: 50%; background: #1b1e36; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1em; color: var(--accent); margin-bottom: 4px; border: 2px solid #333; box-sizing: border-box; position: relative; background-size: cover; background-position: center; }
+        .story-item.online .story-avatar { border: 2px solid transparent; background-image: linear-gradient(var(--card), var(--card)), linear-gradient(135deg, var(--pink), var(--accent)); background-origin: border-box; background-clip: content-box, border-box; }
+        .story-item.online .story-avatar::after { content: ""; position: absolute; bottom: 1px; right: 1px; width: 9px; height: 9px; background: var(--green); border-radius: 50%; border: 2px solid var(--card); }
+        .user-status-text { font-size: 0.7em; color: var(--pink); max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-style: italic; }
+
+        /* Miiverse風コミュニティカード */
+        .thread-item { background: rgba(128, 128, 128, 0.03); border: 2px solid rgba(128, 128, 128, 0.12); padding: 14px; margin-bottom: 12px; cursor: pointer; border-radius: 20px; position: relative; transition: transform 0.15s, border-color 0.15s; display: flex; align-items: center; gap: 12px; }
+        .thread-item:hover { transform: translateY(-2px); border-color: var(--accent); }
+        .thread-item.pulse-neon { border-color: var(--accent); animation: neonGlow 1.5s infinite alternate; }
+        @keyframes neonGlow { 0% { box-shadow: 0 0 5px rgba(0, 240, 255, 0.1); } 100% { box-shadow: 0 0 12px rgba(0, 240, 255, 0.3); } }
+        .thread-icon-box { width: 44px; height: 44px; background: rgba(0, 240, 255, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4em; border: 1px solid rgba(0,240,255,0.2); }
+        .thread-main { flex-grow: 1; min-width: 0; }
+        .thread-header { display: flex; justify-content: space-between; font-size: 0.75em; color: var(--sub-text); margin-bottom: 3px; }
+        
+        /* フォーム・UIパーツ */
+        .form-area { background: rgba(128, 128, 128, 0.02); border: 1px solid rgba(128, 128, 128, 0.1); padding: 14px; margin-bottom: 16px; border-radius: 20px; }
+        .notice-area { border: 2px solid var(--pink); background: rgba(255, 0, 127, 0.02); padding: 12px; margin-bottom: 16px; border-radius: 20px; }
+        .notice-title { color: var(--pink); font-weight: bold; font-size: 0.85em; margin-bottom: 4px; letter-spacing: 1px; }
+        
+        input, textarea, select { width: 100%; padding: 11px; margin: 5px 0; background: rgba(0,0,0,0.2); color: var(--text); border: 2px solid rgba(128, 128, 128, 0.15); box-sizing: border-box; border-radius: 14px; font-size: 15px; outline: none; }
         :root.light-mode input, :root.light-mode textarea, :root.light-mode select { background: #fdfdfd; }
-        button { width: 100%; padding: 12px; border: none; background: linear-gradient(90deg, #00c6ff, #0072ff); color: #fff; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 15px; }
+        button { width: 100%; padding: 11px; border: none; background: linear-gradient(90deg, #00c6ff, #0072ff); color: #fff; border-radius: 14px; font-weight: bold; cursor: pointer; font-size: 15px; transition: opacity 0.2s; }
+        button:active { opacity: 0.8; }
         .btn-pink { background: linear-gradient(90deg, #ff007f, #ff0055); }
-        .post { background: rgba(128, 128, 128, 0.03); border: 1px solid rgba(128, 128, 128, 0.1); padding: 14px; margin-bottom: 14px; border-radius: 16px; }
-        .post-info { display: flex; align-items: center; gap: 8px; color: var(--accent); font-size: 0.85em; margin-bottom: 8px; }
-        .post-avatar-mini { width: 24px; height: 24px; background: #1a1a3a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7em; border: 1px solid var(--accent); background-size: cover; background-position: center; }
-        :root.light-mode .post-avatar-mini { background-color: #e6e8f0; }
+        .btn-danger { background: linear-gradient(90deg, #ef4444, #dc2626) !important; color: white !important; }
+        .btn-small { width: auto; padding: 4px 10px; font-size: 0.75em; margin: 0; background: rgba(128,128,128,0.1); color: var(--text); border-radius: 10px; }
+        
+        /* 投稿、コメント */
+        .post { background: rgba(128, 128, 128, 0.02); border: 2px solid rgba(128, 128, 128, 0.08); padding: 12px; margin-bottom: 12px; border-radius: 20px; }
+        .post-info { display: flex; align-items: center; gap: 8px; color: var(--accent); font-size: 0.8em; margin-bottom: 6px; }
+        .post-avatar-mini { width: 24px; height: 24px; background: #1b1e36; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7em; border: 1px solid var(--accent); background-size: cover; background-position: center; }
         .post-body { font-size: 0.95em; color: var(--text); white-space: pre-wrap; word-break: break-all; }
         .post-body a { color: var(--accent); text-decoration: underline; font-weight: bold; }
-        .post-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; border-top: 1px solid rgba(128,128,128,0.1); padding-top: 8px;}
-        .glow-btn { background: rgba(128, 128, 128, 0.08); border: none; color: var(--sub-text); padding: 5px 14px; font-size: 0.8em; border-radius: 14px; cursor: pointer; font-weight: bold; }
-        .glow-btn.liked { color: var(--pink); background: rgba(255, 0, 127, 0.15); box-shadow: 0 0 10px rgba(255, 0, 127, 0.3); }
-        .likers-list { font-size: 0.75em; color: var(--sub-text); display: flex; gap: 8px; align-items: center; }
-        .read-count { font-size: 0.8em; color: var(--accent); font-weight: bold; }
-        .nav { display: flex; justify-content: space-between; margin-bottom: 15px; gap: 6px; align-items: center; }
+        .post-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; border-top: 1px solid rgba(128,128,128,0.08); padding-top: 6px;}
+        .glow-btn { background: rgba(128, 128, 128, 0.06); border: none; color: var(--sub-text); padding: 4px 12px; font-size: 0.8em; border-radius: 12px; cursor: pointer; font-weight: bold; }
+        .glow-btn.liked { color: var(--pink); background: rgba(255, 0, 127, 0.12); }
+        .read-count { font-size: 0.75em; color: var(--accent); font-weight: bold; }
+        
+        .nav { display: flex; justify-content: space-between; margin-bottom: 12px; gap: 6px; align-items: center; }
         .nav-right { display: flex; gap: 6px; }
-        .btn-small { width: auto; padding: 5px 12px; font-size: 0.75em; margin: 0; background: rgba(128,128,128,0.1); color: var(--text); }
-        .del-btn { color: var(--sub-text); cursor: pointer; margin-left: auto; }
-        #call-status-area { margin-bottom: 12px; padding: 10px; background: rgba(0, 240, 255, 0.02); border: 1px dashed var(--accent); border-radius: 12px; font-size: 0.85em; display: none; }
-        .talkers-count { font-size: 0.8em; color: var(--green); font-weight: bold; margin-top: 4px; display: block;}
-        .notice-text { color: var(--text); font-size: 0.9em; white-space: pre-wrap; }
-        .status-input-container { display: flex; gap: 6px; margin-bottom: 15px; }
-        .video-container { position: relative; width: 100%; max-width: 280px; margin: 12px auto 0 auto; aspect-ratio: 9 / 16; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
-        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+        .del-btn { color: var(--sub-text); cursor: pointer; margin-left: auto; font-size: 0.9em; }
+        .talkers-count { font-size: 0.75em; color: var(--green); font-weight: bold; margin-top: 2px; display: block;}
+        
+        /* 管理画面用レイアウト */
+        .admin-item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid rgba(128,128,128,0.1); font-size: 0.9em; }
+        .admin-sec-title { font-size: 1.1em; font-weight: bold; color: var(--accent); margin: 15px 0 8px 0; border-left: 4px solid var(--accent); padding-left: 8px; }
     </style>
 </head>
 <body>
@@ -90,7 +105,7 @@
 <script>
     const AGORA_APP_ID = "1563871745f642a5a5332fe7ee3ebeba"; 
     const ADMIN_USER_ID = "admin"; 
-    const LAST_UPDATE_TIME = "2026/06/19 18:35";
+    const LAST_UPDATE_TIME = "2026/06/20 10:48";
     const SOUND_URL = "https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav";
 
     let currentUserName = "";
@@ -104,6 +119,8 @@
     let userAvatars = {};
     let threadReadTimes = {};
     let isDarkMode = true;
+    let currentTab = "all"; 
+    let searchKeyword = "";
 
     const firebaseConfig = {
         apiKey: "AIzaSyD2-XU5R6upCUgSDJbDz7iSoEQCzrzusLk",
@@ -190,12 +207,6 @@
         });
     }
 
-    function extractYouTubeId(text) {
-        const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S+\?v=)|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/;
-        const match = text.match(regex);
-        return match ? match[1] : null;
-    }
-
     async function updateReadReceipt(threadId) {
         if (!currentUserName || !threadId || document.visibilityState === "hidden") return;
         await db.collection("read_receipts").doc(`${currentThreadId}_${currentUserName}`).set({
@@ -209,24 +220,36 @@
         document.getElementById('root').innerHTML = `
             <h1>VoiceHello</h1>
             <div class="last-update-tag">最終更新: ${LAST_UPDATE_TIME}</div>
-            <div class="form-area">
+            <div id="auth-box" class="form-area">
                 <input type="text" id="loginId" placeholder="ユーザーID">
                 <input type="password" id="pinCode" placeholder="PINコード">
                 <button onclick="login()">ログイン</button>
-            </div>
-            <div style="text-align:center; margin-top:25px; border-top:1px solid rgba(128,128,128,0.1); padding-top:15px;">
-                <p style="font-size:0.8em; color:var(--sub-text);">【利用申請】</p>
+                <div style="text-align:center; margin-top:15px;">
+                    <a href="#" style="color:var(--accent); font-size:0.85em; font-weight:bold; text-decoration:none;" onclick="showRegisterPage()">✨ 新規アカウント申請はこちら</a>
+                </div>
+            </div>`;
+    }
+
+    function showRegisterPage() {
+        document.getElementById('root').innerHTML = `
+            <h1>VoiceHello</h1>
+            <div class="last-update-tag">アカウント申請</div>
+            <div class="form-area">
                 <input type="text" id="regId" placeholder="希望ユーザーID">
                 <input type="password" id="regPin" placeholder="希望PINコード">
-                <button onclick="register()" class="btn-small" style="width:100%; margin-top:5px;">アカウント申請</button>
+                <button onclick="register()" class="btn-pink">利用申請を送信する</button>
+                <div style="text-align:center; margin-top:15px;">
+                    <a href="#" style="color:var(--sub-text); font-size:0.85em; text-decoration:none;" onclick="showLoginPage()">⬅️ ログイン画面に戻る</a>
+                </div>
             </div>`;
     }
 
     async function login() {
-        const id = document.getElementById('loginId').value;
+        const id = document.getElementById('loginId').value.trim();
         const pin = document.getElementById('pinCode').value;
+        if(!id || !pin) return alert("入力してください");
         const snap = await db.collection("requests").where("userId", "==", id).get();
-        if (snap.empty) return alert("登録がありません");
+        if (snap.empty) return alert("アカウントが見つからないか、キック（削除）されました");
         const data = snap.docs[0].data();
         if (data.pin == pin && data.isApproved) { 
             currentUserName = id; 
@@ -234,15 +257,18 @@
             keepAlive();
             if(keepAliveInterval) clearInterval(keepAliveInterval);
             keepAliveInterval = setInterval(keepAlive, 30000);
-        } else { alert("認証待ち または PIN違い"); }
+        } else { alert("承認待ち、またはPINコードが違います"); }
     }
 
     async function register() {
-        const id = document.getElementById('regId').value;
+        const id = document.getElementById('regId').value.trim();
         const pin = document.getElementById('regPin').value;
         if(!id || !pin) return alert("IDとPINを入力してください");
+        const snap = await db.collection("requests").where("userId", "==", id).get();
+        if(!snap.empty) return alert("このIDはすでに使用されているか、申請中です");
         await db.collection("requests").add({ userId: id, pin: pin, isApproved: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-        alert("申請完了！");
+        alert("申請が完了しました！管理者の承認をお待ちください。");
+        showLoginPage();
     }
 
     async function keepAlive() {
@@ -275,6 +301,24 @@
         document.getElementById('myAvatarInput').value = "";
     }
 
+    function changeTab(tabName) {
+        currentTab = tabName;
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`tab-${tabName}`).classList.add('active');
+        triggerThreadRender();
+    }
+
+    function searchThreads() {
+        searchKeyword = document.getElementById('threadSearchInput').value.toLowerCase().trim();
+        triggerThreadRender();
+    }
+
+    function triggerThreadRender() {
+        if(window.lastThreadSnapshot) {
+            renderThreadList(window.lastThreadSnapshot);
+        }
+    }
+
     function showThreadList() {
         if(unsubscribeThreads) unsubscribeThreads();
         if(unsubscribePosts) unsubscribePosts();
@@ -288,11 +332,11 @@
         currentThreadId = null;
         leaveCall();
         
-        let adminBtn = (currentUserName === ADMIN_USER_ID) ? `<button class="btn-small" style="color:var(--pink);" onclick="showAdminPage()">管理</button>` : "";
+        let adminBtn = (currentUserName === ADMIN_USER_ID) ? `<button class="btn-small" style="color:var(--pink);" onclick="showAdminPage()">👑 管理画面</button>` : "";
         let adminNoticeForm = (currentUserName === ADMIN_USER_ID) ? `
             <div style="margin-top:10px; border-top:1px dashed rgba(128,128,128,0.2); padding-top:10px;">
-                <textarea id="noticeInput" rows="2" placeholder="管理者用お知らせ入力（YouTubeリンクも可）"></textarea>
-                <button onclick="updateNotice()" class="btn-small btn-pink" style="color:#fff;">更新</button>
+                <textarea id="noticeInput" rows="2" placeholder="管理者用お知らせ入力"></textarea>
+                <button onclick="updateNotice()" class="btn-small btn-pink" style="color:#fff;">お知らせを更新</button>
             </div>` : "";
 
         document.getElementById('root').innerHTML = `
@@ -307,28 +351,38 @@
             
             <div class="form-area" style="padding:12px; margin-bottom:12px;">
                 <div class="status-input-container">
-                    <input type="text" id="myStatusInput" placeholder="今なにしてる？（24時間で消える一言）" style="margin:0;">
+                    <input type="text" id="myStatusInput" placeholder="今なにしてる？（一言ステータス）" style="margin:0;">
                     <button onclick="setStatus()" class="btn-small" style="width:auto; white-space:nowrap;">更新</button>
                 </div>
-                <div class="status-input-container" style="margin-bottom:0;">
+                <div class="status-input-container" style="margin-bottom:0; margin-top:6px;">
                     <input type="text" id="myAvatarInput" placeholder="マイアイコン画像URLを設定" style="margin:0;">
                     <button onclick="saveAvatar()" class="btn-small" style="width:auto; white-space:nowrap;">変更</button>
                 </div>
             </div>
 
-            <h1>VoiceHello</h1>
-            <div class="form-area">
-                <input type="text" id="newThreadTitle" placeholder="コミュニティのタイトル（スレタイ）">
-                <textarea id="firstPost" placeholder="最初の投稿内容..."></textarea>
-                <button onclick="createThread()">コミュニティを作成</button>
-            </div>
             <div class="notice-area">
                 <div class="notice-title">📢 NOTICE BOARD</div>
                 <div id="notice-text-content" class="notice-text">お知らせ読み込み中...</div>
-                <div id="notice-video-area"></div>
                 ${adminNoticeForm}
             </div>
-            <div id="list-area">読み込み中...</div>`;
+
+            <h1>コミュニティ広場</h1>
+            <div class="search-bar">
+                <input type="text" id="threadSearchInput" oninput="searchThreads()" placeholder="🔍 コミュニティを検索...">
+            </div>
+            <div class="tabs">
+                <button id="tab-all" class="tab-btn active" onclick="changeTab('all')">すべて</button>
+                <button id="tab-calling" class="tab-btn" onclick="changeTab('calling')">🗣️ 通話中</button>
+            </div>
+            
+            <div id="list-area">コミュニティ読み込み中...</div>
+
+            <div class="form-area" style="margin-top:20px;">
+                <div style="font-weight:bold; font-size:0.9em; margin-bottom:5px; color:var(--accent);">🆕 新しいコミュニティ（スレッド）を作る</div>
+                <input type="text" id="newThreadTitle" placeholder="コミュニティのタイトル">
+                <textarea id="firstPost" rows="2" placeholder="最初のつぶやき内容..."></textarea>
+                <button onclick="createThread()">コミュニティを開設する</button>
+            </div>`;
 
         unsubscribeAvatars = db.collection("avatars").onSnapshot(ss => {
             userAvatars = {};
@@ -385,7 +439,7 @@
                     area.innerHTML += `
                         <div class="story-item ${isOnline ? 'online' : ''}" onclick="promptDirectStatus('${uId}')">
                             <div class="story-avatar" style="${bgStyle}">${avatarUrl ? '' : initial}</div>
-                            <div style="text-overflow: ellipsis; overflow: hidden; width: 68px; white-space: nowrap;">${uId}</div>
+                            <div style="text-overflow: ellipsis; overflow: hidden; width: 64px; white-space: nowrap;">${uId}</div>
                             <div class="user-status-text">${statusText}</div>
                         </div>`;
                 });
@@ -394,9 +448,6 @@
 
         let isFirstLoadThread = true;
         unsubscribeThreads = db.collection("threads").orderBy("createdAt", "desc").onSnapshot(ss => {
-            const area = document.getElementById('list-area');
-            if(!area) return;
-            
             if (!isFirstLoadThread) {
                 ss.docChanges().forEach(change => {
                     if (change.type === "added") {
@@ -409,60 +460,69 @@
                 });
             }
             isFirstLoadThread = false;
-
-            db.collection("active_calls").get().then(callSnap => {
-                const threadTalkers = {};
-                callSnap.forEach(d => { const cData = d.data(); if(!threadTalkers[cData.threadId]) threadTalkers[cData.threadId] = []; threadTalkers[cData.threadId].push(d.id); });
-
-                db.collection("presence").get().then(ps => {
-                    const counts = {};
-                    ps.forEach(d => { counts[d.data().threadId] = (counts[d.data().threadId] || 0) + 1; });
-                    
-                    area.innerHTML = "";
-                    ss.forEach(doc => {
-                        const count = counts[doc.id] || 0;
-                        const talkers = threadTalkers[doc.id] || [];
-                        const data = doc.data();
-                        const canDelete = (currentUserName === ADMIN_USER_ID || data.creator === currentUserName);
-                        const delBtn = canDelete ? `<span class="del-btn" onclick="event.stopPropagation(); deleteThread('${doc.id}')">🗑️</span>` : "";
-                        const talkersText = talkers.length > 0 ? `<span class="talkers-count">🗣️ 通話中: ${talkers.join(", ")}</span>` : "";
-                        const callPulseClass = talkers.length > 0 ? 'pulse-neon' : '';
-
-                        area.innerHTML += `
-                            <div class="thread-item ${callPulseClass}" onclick="showThreadDetail('${doc.id}', '${data.title.replace(/'/g, "\\'")}')">
-                                <div style="flex-grow: 1;">
-                                    <div class="thread-header">
-                                        <span>投稿者: ${data.creator || 'unknown'}</span>
-                                        <span class="view-count">${count > 0 ? '👀 ' + count + '人が閲覧中' : ''}</span>
-                                    </div>
-                                    <div style="font-size:1.1em; font-weight:bold; var(--text); margin:4px 0;">${data.title}</div>
-                                    ${talkersText}
-                                </div>
-                                ${delBtn}
-                            </div>`;
-                    });
-                });
-            });
+            window.lastThreadSnapshot = ss;
+            renderThreadList(ss);
         });
 
         unsubscribeNotice = db.collection("system").doc("notice").onSnapshot(doc => {
             const area = document.getElementById("notice-text-content");
-            const videoArea = document.getElementById("notice-video-area");
-            if (!area || !videoArea) return;
-            if (doc.exists) { 
-                const rawText = doc.data().text || "現在お知らせはありません。";
-                area.innerHTML = linkify(rawText); 
+            if (!area) return;
+            if (doc.exists) { area.innerHTML = linkify(doc.data().text || "現在お知らせはありません。"); }
+        });
+    }
+
+    function renderThreadList(ss) {
+        const area = document.getElementById('list-area');
+        if(!area) return;
+
+        db.collection("active_calls").get().then(callSnap => {
+            const threadTalkers = {};
+            callSnap.forEach(d => { 
+                const cData = d.data(); 
+                if(!threadTalkers[cData.threadId]) threadTalkers[cData.threadId] = []; 
+                threadTalkers[cData.threadId].push(d.id); 
+            });
+
+            db.collection("presence").get().then(ps => {
+                const counts = {};
+                ps.forEach(d => { counts[d.data().threadId] = (counts[d.data().threadId] || 0) + 1; });
                 
-                const ytId = extractYouTubeId(rawText);
-                if (ytId) {
-                    videoArea.innerHTML = `
-                        <div class="video-container">
-                            <iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>
+                area.innerHTML = "";
+                let hasThreads = false;
+
+                ss.forEach(doc => {
+                    const data = doc.data();
+                    const count = counts[doc.id] || 0;
+                    const talkers = threadTalkers[doc.id] || [];
+                    
+                    if (currentTab === "calling" && talkers.length === 0) return;
+                    if (searchKeyword && !data.title.toLowerCase().includes(searchKeyword)) return;
+
+                    hasThreads = true;
+                    const canDelete = (currentUserName === ADMIN_USER_ID || data.creator === currentUserName);
+                    const delBtn = canDelete ? `<span class="del-btn" onclick="event.stopPropagation(); deleteThread('${doc.id}')">🗑️</span>` : "";
+                    const talkersText = talkers.length > 0 ? `<span class="talkers-count">🗣️ ${talkers.join(", ")} が通話中</span>` : "";
+                    const callPulseClass = talkers.length > 0 ? 'pulse-neon' : '';
+                    
+                    area.innerHTML += `
+                        <div class="thread-item ${callPulseClass}" onclick="showThreadDetail('${doc.id}', '${data.title.replace(/'/g, "\\'")}')">
+                            <div class="thread-icon-box">💬</div>
+                            <div class="thread-main">
+                                <div class="thread-header">
+                                    <span>作成者: ${data.creator || 'unknown'}</span>
+                                    <span>${count > 0 ? '👀 ' + count + '人' : ''}</span>
+                                </div>
+                                <div style="font-size:1.05em; font-weight:bold; color:var(--text);">${data.title}</div>
+                                ${talkersText}
+                            </div>
+                            ${delBtn}
                         </div>`;
-                } else {
-                    videoArea.innerHTML = "";
+                });
+
+                if(!hasThreads) {
+                    area.innerHTML = `<div style="text-align:center; padding:20px; color:var(--sub-text); font-size:0.9em;">該当するコミュニティがありません。</div>`;
                 }
-            }
+            });
         });
     }
 
@@ -479,8 +539,9 @@
     }
 
     async function deleteThread(threadId) {
-        if(!confirm("削除しますか？")) return;
+        if(!confirm("このコミュニティを削除しますか？")) return;
         await db.collection("threads").doc(threadId).delete();
+        triggerThreadRender();
     }
 
     function copyInviteLink() {
@@ -508,21 +569,21 @@
         document.getElementById('root').innerHTML = `
             <div class="nav">
                 <button id="theme-toggle-btn" class="btn-small" onclick="toggleTheme()">${isDarkMode ? '🌙 ダークモード' : '☀️ ライトモード'}</button>
-                <button class="btn-small" onclick="showThreadList()">一覧に戻る</button>
+                <button class="btn-small" onclick="showThreadList()">コミュニティ一覧に戻る</button>
             </div>
-            <h1 style="font-size:1.3em; text-align:left; color:var(--text); text-shadow:none; margin-bottom:5px;">${title}</h1>
-            <div class="form-area" style="padding:10px; margin-bottom:15px; background:rgba(255, 0, 127, 0.02); border-color:var(--pink);">
-                <span style="font-size:0.8em; color:var(--pink); font-weight:bold;">✉️ このスレを共有</span>
-                <div style="display:flex; gap:5px; margin-top:5px;">
-                    <button class="btn-small" style="background:#22c55e; color:#fff; width:100%;" onclick="copyInviteLink()">LINE用リンクをコピー</button>
-                </div>
+            <h1 style="font-size:1.25em; text-align:left; color:var(--text); text-shadow:none; margin-bottom:5px;">${title}</h1>
+            
+            <div id="call-status-area" style="margin-bottom:10px; padding:10px; background:rgba(0, 240, 255, 0.02); border:1px dashed var(--accent); border-radius:12px; font-size:0.85em; display:none;">
+                <div>● 通話中のメンバー: <span id="online-users" style="color:var(--accent); font-weight:bold;">あなたのみ</span></div>
             </div>
-            <div id="call-status-area"><div>● 通話中: <span id="online-users" style="color:var(--accent); font-weight:bold;">あなたのみ</span></div></div>
             <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <button id="join-btn" onclick="joinCall('${id}')">通話に参加</button>
-                <button id="leave-btn" style="display:none; background:linear-gradient(90deg, #ef4444, #dc2626);" onclick="leaveCall()">通話を終了</button>
+                <button id="join-btn" onclick="joinCall('${id}')">🔊 通話に参加</button>
+                <button id="leave-btn" style="display:none; background:linear-gradient(90deg, #ef4444, #dc2626);" onclick="leaveCall()">🛑 通話を終了</button>
             </div>
-            <div class="form-area"><textarea id="replyText" rows="3" placeholder="コメントを投稿..."></textarea><button onclick="sendReply()">コメントを投稿</button></div>
+            <div class="form-area">
+                <textarea id="replyText" rows="3" placeholder="ここにコメントを書き込む..."></textarea>
+                <button onclick="sendReply()">コメントを投稿する</button>
+            </div>
             <div id="post-area"></div>`;
 
         unsubscribeReadReceipts = db.collection("read_receipts").where("threadId", "==", id).onSnapshot(ss => {
@@ -566,7 +627,7 @@
             area.innerHTML = "";
             
             posts.forEach(p => {
-                const delBtn = (currentUserName === ADMIN_USER_ID) ? `<span class="del-btn" onclick="deletePost('${p.id}')">×</span>` : "";
+                const delBtn = (currentUserName === ADMIN_USER_ID || p.user === currentUserName) ? `<span class="del-btn" onclick="deletePost('${p.id}')">×</span>` : "";
                 const likes = p.likes || [];
                 const isLiked = likes.includes(currentUserName);
                 const miniInt = p.user.substring(0,2).toUpperCase();
@@ -592,9 +653,7 @@
                         </div>
                         <div class="post-body">${linkify(p.text)}</div>
                         <div class="post-footer">
-                            <div class="likers-list">
-                                ${readReceiptText}
-                            </div>
+                            <div>${readReceiptText}</div>
                             <button class="glow-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${p.id}', ${JSON.stringify(likes).replace(/"/g, '&quot;')})">
                                 ❤️ (${likes.length})
                             </button>
@@ -658,22 +717,53 @@
     }
 
     async function showAdminPage() {
+        if (currentUserName !== ADMIN_USER_ID) return showThreadList();
+        
         document.getElementById('root').innerHTML = `
-            <div class="nav"><button class="btn-small" onclick="showThreadList()">戻る</button></div>
-            <h1>ユーザー承認</h1>
-            <div id="admin-list" class="form-area">読み込み中...</div>`;
+            <div class="nav"><button class="btn-small" onclick="showThreadList()">⬅️ コミュニティに戻る</button></div>
+            <h1>👑 総合管理システム</h1>
             
-        db.collection("requests").where("isApproved", "==", false).onSnapshot(ss => {
-            const area = document.getElementById('admin-list');
+            <div class="admin-sec-title">👤 利用申請・登録ユーザー一覧</div>
+            <div id="admin-user-list" class="form-area" style="max-height: 250px; overflow-y: auto;">読み込み中...</div>
+
+            <div class="admin-sec-title">💬 全コミュニティ（スレッド）管理</div>
+            <div id="admin-thread-list" class="form-area" style="max-height: 250px; overflow-y: auto;">読み込み中...</div>`;
+            
+        // ユーザー一元管理（承認 ＆ キック/BAN）
+        db.collection("requests").orderBy("createdAt", "desc").onSnapshot(ss => {
+            const area = document.getElementById('admin-user-list');
             if(!area) return;
-            if(ss.empty) { area.innerHTML = "未承認ユーザーはゼロです。"; return; }
+            if(ss.empty) { area.innerHTML = "ユーザーデータがありません。"; return; }
             area.innerHTML = "";
             ss.forEach(doc => {
                 const r = doc.data();
+                let actionBtn = "";
+                if (!r.isApproved) {
+                    actionBtn = `<button class="btn-small" style="background:var(--green); color:#000;" onclick="approveUser('${doc.id}')">承認</button>`;
+                } else {
+                    actionBtn = `<button class="btn-small btn-danger" onclick="kickUser('${doc.id}', '${r.userId}')">キック(BAN)</button>`;
+                }
+                const statusTag = r.isApproved ? `<span style="color:var(--green);">[公認]</span>` : `<span style="color:var(--miiverse-orange);">[未承]</span>`;
                 area.innerHTML += `
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid rgba(128,128,128,0.1);">
-                        <span>ID: <b>${r.userId}</b></span>
-                        <button class="btn-small" style="background:var(--accent); color:#000;" onclick="approveUser('${doc.id}')">承認する</button>
+                    <div class="admin-item-row">
+                        <span>${statusTag} <b>${r.userId}</b></span>
+                        <div>${actionBtn}</div>
+                    </div>`;
+            });
+        });
+
+        // スレッド強制削除管理
+        db.collection("threads").orderBy("createdAt", "desc").onSnapshot(ss => {
+            const area = document.getElementById('admin-thread-list');
+            if(!area) return;
+            if(ss.empty) { area.innerHTML = "コミュニティはありません。"; return; }
+            area.innerHTML = "";
+            ss.forEach(doc => {
+                const t = doc.data();
+                area.innerHTML += `
+                    <div class="admin-item-row">
+                        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:70%;"><b>${t.title}</b> <small style="color:var(--sub-text);">by ${t.creator}</small></span>
+                        <button class="btn-small btn-danger" onclick="adminDeleteThread('${doc.id}')">強制削除</button>
                     </div>`;
             });
         });
@@ -681,13 +771,30 @@
 
     async function approveUser(docId) {
         await db.collection("requests").doc(docId).update({ isApproved: true });
-        alert("承認しました！");
+        alert("ユーザーを承認しました！");
+    }
+
+    async function kickUser(docId, userId) {
+        if(!confirm(`ユーザー「${userId}」を本当にキック（アカウント削除・BAN）しますか？\nログインできなくなります。`)) return;
+        // データベースから申請・アカウントデータを完全に抹消
+        await db.collection("requests").doc(docId).delete();
+        // プレゼンス情報やステータスもついでにクリーンアップ
+        await db.collection("users_status").doc(userId).delete();
+        await db.collection("statuses").doc(userId).delete();
+        await db.collection("avatars").doc(userId).delete();
+        alert(`ユーザー「${userId}」を追放しました。`);
+    }
+
+    async function adminDeleteThread(threadId) {
+        if(!confirm("管理権限でこのコミュニティを強制削除しますか？")) return;
+        await db.collection("threads").doc(threadId).delete();
+        alert("コミュニティを削除しました。");
     }
 
     async function createThread() {
-        const title = document.getElementById('newThreadTitle').value;
-        const text = document.getElementById('firstPost').value;
-        if(!title || !text) return;
+        const title = document.getElementById('newThreadTitle').value.trim();
+        const text = document.getElementById('firstPost').value.trim();
+        if(!title || !text) return alert("タイトルと言葉を入力してね");
         const threadRef = await db.collection("threads").add({ title, creator: currentUserName, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         await db.collection("posts").add({ threadId: threadRef.id, user: currentUserName, text, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         showThreadDetail(threadRef.id, title);
