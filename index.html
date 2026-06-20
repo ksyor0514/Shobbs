@@ -39,14 +39,13 @@
         h1 { text-align: center; color: var(--accent); letter-spacing: 1px; margin: 5px 0; font-size: 1.6em; font-weight: 900; text-shadow: 0 0 6px rgba(0, 240, 255, 0.2); }
         .last-update-tag { text-align: center; font-size: 0.7em; color: var(--sub-text); margin-bottom: 20px; font-weight: bold; }
         
-        /* 検索・タブUI */
         .search-bar { display: flex; gap: 6px; margin-bottom: 12px; }
         .search-bar input { margin: 0; }
         .tabs { display: flex; gap: 8px; margin-bottom: 15px; border-bottom: 2px solid rgba(128,128,128,0.1); padding-bottom: 8px; }
         .tab-btn { background: transparent; border: 2px solid transparent; color: var(--sub-text); padding: 6px 16px; border-radius: 20px; font-size: 0.85em; font-weight: bold; width: auto; cursor: pointer; transition: all 0.2s; }
         .tab-btn.active { background: var(--accent); color: #000; border-color: var(--accent); box-shadow: 0 0 8px rgba(0,240,255,0.3); }
 
-        /* ストーリー */
+        /* ストーリー（オンライン左寄せ） */
         .stories-container { display: flex; gap: 14px; overflow-x: auto; white-space: nowrap; padding: 5px 5px 12px 5px; margin-bottom: 15px; border-bottom: 1px solid rgba(128, 128, 128, 0.1); -webkit-overflow-scrolling: touch; }
         .story-item { display: flex; flex-direction: column; align-items: center; font-size: 0.75em; color: var(--text); min-width: 64px; max-width: 64px; text-align: center; cursor: pointer; }
         .story-avatar { width: 48px; height: 48px; border-radius: 50%; background: #1b1e36; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1em; color: var(--accent); margin-bottom: 4px; border: 2px solid #333; box-sizing: border-box; position: relative; background-size: cover; background-position: center; }
@@ -54,17 +53,15 @@
         .story-item.online .story-avatar::after { content: ""; position: absolute; bottom: 1px; right: 1px; width: 9px; height: 9px; background: var(--green); border-radius: 50%; border: 2px solid var(--card); }
         .user-status-text { font-size: 0.7em; color: var(--pink); max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-style: italic; }
 
-        /* Miiverse風コミュニティカード */
         .thread-item { background: rgba(128, 128, 128, 0.03); border: 2px solid rgba(128, 128, 128, 0.12); padding: 14px; margin-bottom: 12px; cursor: pointer; border-radius: 20px; position: relative; transition: transform 0.15s, border-color 0.15s; display: flex; align-items: center; gap: 12px; }
         .thread-item:hover { transform: translateY(-2px); border-color: var(--accent); }
         .thread-item.pulse-neon { border-color: var(--accent); animation: neonGlow 1.5s infinite alternate; }
-        .thread-item.event-th { border-color: var(--purple); }
+        .thread-item.event-th { border-color: var(--purple); box-shadow: 0 0 10px rgba(191, 85, 236, 0.15); }
         @keyframes neonGlow { 0% { box-shadow: 0 0 5px rgba(0, 240, 255, 0.1); } 100% { box-shadow: 0 0 12px rgba(0, 240, 255, 0.3); } }
         .thread-icon-box { width: 44px; height: 44px; background: rgba(0, 240, 255, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4em; border: 1px solid rgba(0,240,255,0.2); }
         .thread-main { flex-grow: 1; min-width: 0; }
         .thread-header { display: flex; justify-content: space-between; font-size: 0.75em; color: var(--sub-text); margin-bottom: 3px; }
         
-        /* フォーム */
         .form-area { background: rgba(128, 128, 128, 0.02); border: 1px solid rgba(128, 128, 128, 0.1); padding: 14px; margin-bottom: 16px; border-radius: 20px; }
         .notice-area { border: 2px solid var(--pink); background: rgba(255, 0, 127, 0.02); padding: 12px; margin-bottom: 16px; border-radius: 20px; }
         .notice-title { color: var(--pink); font-weight: bold; font-size: 0.85em; margin-bottom: 4px; letter-spacing: 1px; }
@@ -78,7 +75,6 @@
         .btn-danger { background: linear-gradient(90deg, #ef4444, #dc2626) !important; color: white !important; }
         .btn-small { width: auto; padding: 4px 10px; font-size: 0.75em; margin: 0; background: rgba(128,128,128,0.1); color: var(--text); border-radius: 10px; }
         
-        /* 投稿 */
         .post { background: rgba(128, 128, 128, 0.02); border: 2px solid rgba(128, 128, 128, 0.08); padding: 12px; margin-bottom: 12px; border-radius: 20px; }
         .post-info { display: flex; align-items: center; gap: 8px; color: var(--accent); font-size: 0.8em; margin-bottom: 6px; }
         .post-avatar-mini { width: 24px; height: 24px; background: #1b1e36; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7em; border: 1px solid var(--accent); background-size: cover; background-position: center; }
@@ -86,17 +82,13 @@
         .post-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; border-top: 1px solid rgba(128,128,128,0.08); padding-top: 6px;}
         .glow-btn { background: rgba(128, 128, 128, 0.06); border: none; color: var(--sub-text); padding: 4px 12px; font-size: 0.8em; border-radius: 12px; cursor: pointer; font-weight: bold; }
         .glow-btn.liked { color: var(--pink); background: rgba(255, 0, 127, 0.12); }
-        .read-count { font-size: 0.75em; color: var(--accent); font-weight: bold; }
         
         .nav { display: flex; justify-content: space-between; margin-bottom: 12px; gap: 6px; align-items: center; }
         .del-btn { color: var(--sub-text); cursor: pointer; margin-left: auto; font-size: 0.9em; }
         .talkers-count { font-size: 0.75em; color: var(--green); font-weight: bold; margin-top: 2px; display: block;}
         
-        /* 管理画面 */
         .admin-item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid rgba(128,128,128,0.1); font-size: 0.9em; }
         .admin-sec-title { font-size: 1.1em; font-weight: bold; color: var(--accent); margin: 15px 0 8px 0; border-left: 4px solid var(--accent); padding-left: 8px; }
-        
-        /* 称号バッジ */
         .badge-tag { background: rgba(0, 240, 255, 0.15); color: var(--accent); font-size: 0.75em; padding: 1px 6px; border-radius: 5px; font-weight: bold; margin-left: 4px; border: 1px solid rgba(0, 240, 255, 0.3); }
     </style>
 </head>
@@ -108,21 +100,20 @@
 <script>
     const AGORA_APP_ID = "1563871745f642a5a5332fe7ee3ebeba"; 
     const ADMIN_USER_ID = "admin"; 
-    const LAST_UPDATE_TIME = "2026/06/20 11:20";
+    const LAST_UPDATE_TIME = "2026/06/20 11:35";
     const SOUND_URL = "https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav";
 
     let currentUserName = "";
     let currentThreadId = null;
     let currentThreadIsEvent = false;
     let db, client, localAudioTrack;
-    let unsubscribeThreads = null, unsubscribePosts = null, unsubscribePresence = null, unsubscribeMembers = null, unsubscribeNotice = null, unsubscribeStatuses = null, unsubscribeAvatars = null, unsubscribeReadReceipts = null, unsubscribeTitles = null;
+    let unsubscribeThreads = null, unsubscribePosts = null, unsubscribePresence = null, unsubscribeMembers = null, unsubscribeNotice = null, unsubscribeStatuses = null, unsubscribeAvatars = null, unsubscribeTitles = null;
     let keepAliveInterval = null;
     let originalTitle = document.title;
     let blinkInterval = null;
     let userStatuses = {};
     let userAvatars = {};
     let userTitles = {};
-    let threadReadTimes = {};
     let isDarkMode = true;
     let currentTab = "all"; 
     let searchKeyword = "";
@@ -193,20 +184,12 @@
         });
     }
 
-    // ★重要: 名前とバッジを表示する関数
     function getNameWithBadge(userId) {
         let name = userId;
         if (userId === ADMIN_USER_ID) name += "👑";
         const title = userTitles[userId];
         if (title) name += `<span class="badge-tag">${title}</span>`;
         return name;
-    }
-
-    async function updateReadReceipt(threadId) {
-        if (!currentUserName || !threadId || document.visibilityState === "hidden") return;
-        await db.collection("read_receipts").doc(`${currentThreadId}_${currentUserName}`).set({
-            threadId: threadId, user: currentUserName, lastReadAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
     }
 
     function showLoginPage() {
@@ -290,7 +273,6 @@
         if(unsubscribeNotice) unsubscribeNotice();
         if(unsubscribeStatuses) unsubscribeStatuses();
         if(unsubscribeAvatars) unsubscribeAvatars();
-        if(unsubscribeReadReceipts) unsubscribeReadReceipts();
         if(unsubscribeTitles) unsubscribeTitles();
         
         updatePresence(null);
@@ -338,11 +320,10 @@
                 <button onclick="createThread()">開設する</button>
             </div>`;
 
-        // 称号データのリッスン
         unsubscribeTitles = db.collection("user_titles").onSnapshot(ss => {
             userTitles = {};
             ss.forEach(doc => { userTitles[doc.id] = doc.data().title; });
-            triggerThreadRender(); // リスト再描画
+            triggerThreadRender();
         });
 
         unsubscribeAvatars = db.collection("avatars").onSnapshot(ss => {
@@ -355,6 +336,7 @@
             ss.forEach(doc => { userStatuses[doc.id] = doc.data().text; });
         });
 
+        // 🟢 オンライン左寄せ表示ロジック完全復活
         unsubscribeMembers = db.collection("users_status").onSnapshot(statusSnap => {
             const onlineUsers = new Set();
             const now = Date.now();
@@ -366,16 +348,34 @@
                 const area = document.getElementById("stories-area");
                 if(!area) return;
                 area.innerHTML = "";
+                
+                const onlineList = [];
+                const offlineList = [];
+                
                 snap.forEach(doc => {
                     const uId = doc.data().userId;
+                    if (onlineUsers.has(uId)) {
+                        if (uId === currentUserName) onlineList.unshift(uId);
+                        else onlineList.push(uId);
+                    } else {
+                        if (uId === currentUserName) offlineList.unshift(uId);
+                        else offlineList.push(uId);
+                    }
+                });
+                
+                const sortedUsers = [...onlineList, ...offlineList];
+
+                sortedUsers.forEach(uId => {
                     const isOnline = onlineUsers.has(uId);
                     const avatarUrl = userAvatars[uId] || "";
                     const bgStyle = avatarUrl ? `background-image: url('${avatarUrl}'); color:transparent;` : "";
                     const displayName = getNameWithBadge(uId);
+                    const statusText = userStatuses[uId] ? userStatuses[uId] : "";
                     area.innerHTML += `
                         <div class="story-item ${isOnline ? 'online' : ''}">
                             <div class="story-avatar" style="${bgStyle}">${avatarUrl ? '' : uId.substring(0,2)}</div>
-                            <div style="width:64px; overflow:hidden; text-overflow:ellipsis;">${displayName}</div>
+                            <div style="width:64px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${displayName}</div>
+                            <div class="user-status-text">${statusText}</div>
                         </div>`;
                 });
             });
@@ -412,7 +412,7 @@
                 if (searchKeyword && !data.title.toLowerCase().includes(searchKeyword)) return;
 
                 const isEvent = data.isEvent === true;
-                const talkersText = talkers.length > 0 ? `<span class="talkers-count">🗣️ ${talkers.map(t=>isEvent?'匿名':t).join(", ")} 通話中</span>` : "";
+                const talkersText = talkers.length > 0 ? `<span class="talkers-count">🗣️ ${talkers.map(t=>isEvent?'匿名':getNameWithBadge(t)).join(", ")} 通話中</span>` : "";
                 const creator = isEvent ? "管理者イベント" : getNameWithBadge(data.creator);
 
                 area.innerHTML += `
@@ -511,6 +511,12 @@
             <div class="nav"><button class="btn-small" onclick="showThreadList()">⬅️ 戻る</button></div>
             <h1>👑 管理画面</h1>
             
+            <div class="admin-sec-title">📢 お知らせ（NOTICE）を更新する</div>
+            <div class="form-area">
+                <textarea id="noticeInput" rows="2" placeholder="広場トップに表示するお知らせ文"></textarea>
+                <button onclick="updateNotice()" class="btn-pink">お知らせを更新して反映</button>
+            </div>
+
             <div class="admin-sec-title">🎫 称号（バッジ）を授与する</div>
             <div class="form-area">
                 <select id="targetUserSelect"><option value="">授与する人を選択</option></select>
@@ -524,7 +530,7 @@
             <div class="admin-sec-title">👤 ユーザー管理 / BAN</div>
             <div id="admin-user-list"></div>`;
 
-        // 授与セレクトの作成
+        // セレクトボックスにユーザー追加
         const select = document.getElementById("targetUserSelect");
         db.collection("requests").where("isApproved", "==", true).get().then(snap => {
             snap.forEach(doc => {
@@ -533,7 +539,7 @@
             });
         });
 
-        // ユーザー管理リスト
+        // ユーザーリスト表示
         db.collection("requests").onSnapshot(ss => {
             const area = document.getElementById('admin-user-list');
             if(!area) return;
@@ -546,12 +552,22 @@
         });
     }
 
+    // 📢 お知らせをDBに送る関数
+    async function updateNotice() {
+        const text = document.getElementById("noticeInput").value;
+        if(!text.trim()) return alert("お知らせを入力してね");
+        await db.collection("system").doc("notice").set({ text: text, updatedBy: currentUserName });
+        alert("広場のお知らせを更新しました！");
+        document.getElementById("noticeInput").value = "";
+    }
+
     async function assignTitle() {
         const userId = document.getElementById("targetUserSelect").value;
         const title = document.getElementById("newTitleInput").value.trim();
         if(!userId || !title) return alert("ユーザーと称号を入力してね");
         await db.collection("user_titles").doc(userId).set({ title });
         alert(`ユーザー「${userId}」に称号「${title}」を授与しました！`);
+        document.getElementById("newTitleInput").value = "";
     }
 
     async function startAdminEvent() {
