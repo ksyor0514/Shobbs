@@ -34,11 +34,9 @@
         body { background-color: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif; margin: 0; padding: 10px; display: flex; justify-content: center; min-height: 100vh; transition: background-color 0.3s, color 0.3s; }
         .container { width: 100%; max-width: 650px; background: var(--card); border: 2px solid var(--border); min-height: 95vh; padding: 15px; box-sizing: border-box; border-radius: 28px; transition: background 0.3s, border-color 0.3s; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
         
-        /* Miiverse風ヘッダー */
         h1 { text-align: center; color: var(--accent); letter-spacing: 1px; margin: 5px 0; font-size: 1.6em; font-weight: 900; text-shadow: 0 0 6px rgba(0, 240, 255, 0.2); }
         .last-update-tag { text-align: center; font-size: 0.7em; color: var(--sub-text); margin-bottom: 20px; font-weight: bold; }
         
-        /* 検索・タブUI */
         .search-bar { display: flex; gap: 6px; margin-bottom: 12px; }
         .search-bar input { margin: 0; }
         .tabs { display: flex; gap: 8px; margin-bottom: 15px; border-bottom: 2px solid rgba(128,128,128,0.1); padding-bottom: 8px; }
@@ -46,7 +44,6 @@
         .tab-btn.active { background: var(--accent); color: #000; border-color: var(--accent); box-shadow: 0 0 8px rgba(0,240,255,0.3); }
         :root.light-mode .tab-btn.active { color: #fff; }
 
-        /* ストーリー */
         .stories-container { display: flex; gap: 14px; overflow-x: auto; white-space: nowrap; padding: 5px 5px 12px 5px; margin-bottom: 15px; border-bottom: 1px solid rgba(128, 128, 128, 0.1); -webkit-overflow-scrolling: touch; }
         .story-item { display: flex; flex-direction: column; align-items: center; font-size: 0.75em; color: var(--text); min-width: 64px; max-width: 64px; text-align: center; cursor: pointer; }
         .story-avatar { width: 48px; height: 48px; border-radius: 50%; background: #1b1e36; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1em; color: var(--accent); margin-bottom: 4px; border: 2px solid #333; box-sizing: border-box; position: relative; background-size: cover; background-position: center; }
@@ -54,7 +51,6 @@
         .story-item.online .story-avatar::after { content: ""; position: absolute; bottom: 1px; right: 1px; width: 9px; height: 9px; background: var(--green); border-radius: 50%; border: 2px solid var(--card); }
         .user-status-text { font-size: 0.7em; color: var(--pink); max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-style: italic; }
 
-        /* Miiverse風コミュニティカード */
         .thread-item { background: rgba(128, 128, 128, 0.03); border: 2px solid rgba(128, 128, 128, 0.12); padding: 14px; margin-bottom: 12px; cursor: pointer; border-radius: 20px; position: relative; transition: transform 0.15s, border-color 0.15s; display: flex; align-items: center; gap: 12px; }
         .thread-item:hover { transform: translateY(-2px); border-color: var(--accent); }
         .thread-item.pulse-neon { border-color: var(--accent); animation: neonGlow 1.5s infinite alternate; }
@@ -63,7 +59,6 @@
         .thread-main { flex-grow: 1; min-width: 0; }
         .thread-header { display: flex; justify-content: space-between; font-size: 0.75em; color: var(--sub-text); margin-bottom: 3px; }
         
-        /* フォーム・UIパーツ */
         .form-area { background: rgba(128, 128, 128, 0.02); border: 1px solid rgba(128, 128, 128, 0.1); padding: 14px; margin-bottom: 16px; border-radius: 20px; }
         .notice-area { border: 2px solid var(--pink); background: rgba(255, 0, 127, 0.02); padding: 12px; margin-bottom: 16px; border-radius: 20px; }
         .notice-title { color: var(--pink); font-weight: bold; font-size: 0.85em; margin-bottom: 4px; letter-spacing: 1px; }
@@ -76,7 +71,6 @@
         .btn-danger { background: linear-gradient(90deg, #ef4444, #dc2626) !important; color: white !important; }
         .btn-small { width: auto; padding: 4px 10px; font-size: 0.75em; margin: 0; background: rgba(128,128,128,0.1); color: var(--text); border-radius: 10px; }
         
-        /* 投稿、コメント */
         .post { background: rgba(128, 128, 128, 0.02); border: 2px solid rgba(128, 128, 128, 0.08); padding: 12px; margin-bottom: 12px; border-radius: 20px; }
         .post-info { display: flex; align-items: center; gap: 8px; color: var(--accent); font-size: 0.8em; margin-bottom: 6px; }
         .post-avatar-mini { width: 24px; height: 24px; background: #1b1e36; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7em; border: 1px solid var(--accent); background-size: cover; background-position: center; }
@@ -92,9 +86,9 @@
         .del-btn { color: var(--sub-text); cursor: pointer; margin-left: auto; font-size: 0.9em; }
         .talkers-count { font-size: 0.75em; color: var(--green); font-weight: bold; margin-top: 2px; display: block;}
         
-        /* 管理画面用レイアウト */
         .admin-item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid rgba(128,128,128,0.1); font-size: 0.9em; }
         .admin-sec-title { font-size: 1.1em; font-weight: bold; color: var(--accent); margin: 15px 0 8px 0; border-left: 4px solid var(--accent); padding-left: 8px; }
+        .badge-admin { background: #ffd700; color: #000; font-size: 0.8em; padding: 1px 4px; border-radius: 4px; font-weight: bold; margin-left: 3px; }
     </style>
 </head>
 <body>
@@ -105,7 +99,7 @@
 <script>
     const AGORA_APP_ID = "1563871745f642a5a5332fe7ee3ebeba"; 
     const ADMIN_USER_ID = "admin"; 
-    const LAST_UPDATE_TIME = "2026/06/20 10:48";
+    const LAST_UPDATE_TIME = "2026/06/20 10:52";
     const SOUND_URL = "https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav";
 
     let currentUserName = "";
@@ -205,6 +199,13 @@
         return text.replace(urlRegex, function(url) {
             return '<a href="' + url + '" target="_blank" rel="noopener noreferrer">' + url + '</a>';
         });
+    }
+
+    function getNameWithBadge(userId) {
+        if (userId === ADMIN_USER_ID) {
+            return `${userId}👑`;
+        }
+        return userId;
     }
 
     async function updateReadReceipt(threadId) {
@@ -435,11 +436,12 @@
                     const statusText = userStatuses[uId] ? userStatuses[uId] : "";
                     const avatarUrl = userAvatars[uId] || "";
                     const bgStyle = avatarUrl ? `background-image: url('${avatarUrl}'); color:transparent;` : "";
+                    const displayName = getNameWithBadge(uId);
                     
                     area.innerHTML += `
                         <div class="story-item ${isOnline ? 'online' : ''}" onclick="promptDirectStatus('${uId}')">
                             <div class="story-avatar" style="${bgStyle}">${avatarUrl ? '' : initial}</div>
-                            <div style="text-overflow: ellipsis; overflow: hidden; width: 64px; white-space: nowrap;">${uId}</div>
+                            <div style="text-overflow: ellipsis; overflow: hidden; width: 64px; white-space: nowrap;">${displayName}</div>
                             <div class="user-status-text">${statusText}</div>
                         </div>`;
                 });
@@ -501,15 +503,18 @@
                     hasThreads = true;
                     const canDelete = (currentUserName === ADMIN_USER_ID || data.creator === currentUserName);
                     const delBtn = canDelete ? `<span class="del-btn" onclick="event.stopPropagation(); deleteThread('${doc.id}')">🗑️</span>` : "";
-                    const talkersText = talkers.length > 0 ? `<span class="talkers-count">🗣️ ${talkers.join(", ")} が通話中</span>` : "";
+                    
+                    const dynamicTalkers = talkers.map(tUid => getNameWithBadge(tUid));
+                    const talkersText = talkers.length > 0 ? `<span class="talkers-count">🗣️ ${dynamicTalkers.join(", ")} が通話中</span>` : "";
                     const callPulseClass = talkers.length > 0 ? 'pulse-neon' : '';
+                    const creatorDisplayName = getNameWithBadge(data.creator || 'unknown');
                     
                     area.innerHTML += `
                         <div class="thread-item ${callPulseClass}" onclick="showThreadDetail('${doc.id}', '${data.title.replace(/'/g, "\\'")}')">
                             <div class="thread-icon-box">💬</div>
                             <div class="thread-main">
                                 <div class="thread-header">
-                                    <span>作成者: ${data.creator || 'unknown'}</span>
+                                    <span>作成者: ${creatorDisplayName}</span>
                                     <span>${count > 0 ? '👀 ' + count + '人' : ''}</span>
                                 </div>
                                 <div style="font-size:1.05em; font-weight:bold; color:var(--text);">${data.title}</div>
@@ -528,7 +533,8 @@
 
     function promptDirectStatus(uId) {
         if(userStatuses[uId]) {
-            alert(`${uId} のステータス:\n「${userStatuses[uId]}」`);
+            const name = getNameWithBadge(uId);
+            alert(`${name} のステータス:\n「${userStatuses[uId]}」`);
         }
     }
 
@@ -542,16 +548,6 @@
         if(!confirm("このコミュニティを削除しますか？")) return;
         await db.collection("threads").doc(threadId).delete();
         triggerThreadRender();
-    }
-
-    function copyInviteLink() {
-        const dummy = document.createElement('input');
-        document.body.appendChild(dummy);
-        dummy.value = window.location.href;
-        dummy.select();
-        document.execCommand('copy');
-        document.body.removeChild(dummy);
-        alert("招待リンクをコピーしました！");
     }
 
     async function showThreadDetail(id, title) {
@@ -634,6 +630,7 @@
                 
                 const avatarUrl = userAvatars[p.user] || "";
                 const bgStyle = avatarUrl ? `background-image: url('${avatarUrl}'); color:transparent;` : "";
+                const userDisplayName = getNameWithBadge(p.user);
 
                 let readCount = 0;
                 const pTime = p.createdAt ? p.createdAt.toMillis() : Date.now();
@@ -648,7 +645,7 @@
                     <div class="post">
                         <div class="post-info">
                             <div class="post-avatar-mini" style="${bgStyle}">${avatarUrl ? '' : miniInt}</div>
-                            <span>${p.user}</span>
+                            <span>${userDisplayName}</span>
                             ${delBtn}
                         </div>
                         <div class="post-body">${linkify(p.text)}</div>
@@ -704,7 +701,8 @@
         const area = document.getElementById('online-users');
         if(!area) return;
         const allUsers = [currentUserName, ...client.remoteUsers.map(u => u.uid)];
-        area.innerText = allUsers.join(", ");
+        const mappedUsers = allUsers.map(uid => getNameWithBadge(uid));
+        area.innerText = mappedUsers.join(", ");
     }
 
     async function leaveCall() {
@@ -729,7 +727,6 @@
             <div class="admin-sec-title">💬 全コミュニティ（スレッド）管理</div>
             <div id="admin-thread-list" class="form-area" style="max-height: 250px; overflow-y: auto;">読み込み中...</div>`;
             
-        // ユーザー一元管理（承認 ＆ キック/BAN）
         db.collection("requests").orderBy("createdAt", "desc").onSnapshot(ss => {
             const area = document.getElementById('admin-user-list');
             if(!area) return;
@@ -744,15 +741,15 @@
                     actionBtn = `<button class="btn-small btn-danger" onclick="kickUser('${doc.id}', '${r.userId}')">キック(BAN)</button>`;
                 }
                 const statusTag = r.isApproved ? `<span style="color:var(--green);">[公認]</span>` : `<span style="color:var(--miiverse-orange);">[未承]</span>`;
+                const userDisplayName = getNameWithBadge(r.userId);
                 area.innerHTML += `
                     <div class="admin-item-row">
-                        <span>${statusTag} <b>${r.userId}</b></span>
+                        <span>${statusTag} <b>${userDisplayName}</b></span>
                         <div>${actionBtn}</div>
                     </div>`;
             });
         });
 
-        // スレッド強制削除管理
         db.collection("threads").orderBy("createdAt", "desc").onSnapshot(ss => {
             const area = document.getElementById('admin-thread-list');
             if(!area) return;
@@ -760,9 +757,10 @@
             area.innerHTML = "";
             ss.forEach(doc => {
                 const t = doc.data();
+                const creatorDisplayName = getNameWithBadge(t.creator);
                 area.innerHTML += `
                     <div class="admin-item-row">
-                        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:70%;"><b>${t.title}</b> <small style="color:var(--sub-text);">by ${t.creator}</small></span>
+                        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:70%;"><b>${t.title}</b> <small style="color:var(--sub-text);">by ${creatorDisplayName}</small></span>
                         <button class="btn-small btn-danger" onclick="adminDeleteThread('${doc.id}')">強制削除</button>
                     </div>`;
             });
@@ -776,9 +774,7 @@
 
     async function kickUser(docId, userId) {
         if(!confirm(`ユーザー「${userId}」を本当にキック（アカウント削除・BAN）しますか？\nログインできなくなります。`)) return;
-        // データベースから申請・アカウントデータを完全に抹消
         await db.collection("requests").doc(docId).delete();
-        // プレゼンス情報やステータスもついでにクリーンアップ
         await db.collection("users_status").doc(userId).delete();
         await db.collection("statuses").doc(userId).delete();
         await db.collection("avatars").doc(userId).delete();
