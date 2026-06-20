@@ -20,6 +20,7 @@
             --border: rgba(0, 240, 255, 0.2);
             --sub-text: #7c7ca3;
             --miiverse-orange: #ff9900;
+            --purple: #bf55ec;
         }
         :root.light-mode {
             --bg: #f2f4f8;
@@ -54,6 +55,7 @@
         .thread-item { background: rgba(128, 128, 128, 0.03); border: 2px solid rgba(128, 128, 128, 0.12); padding: 14px; margin-bottom: 12px; cursor: pointer; border-radius: 20px; position: relative; transition: transform 0.15s, border-color 0.15s; display: flex; align-items: center; gap: 12px; }
         .thread-item:hover { transform: translateY(-2px); border-color: var(--accent); }
         .thread-item.pulse-neon { border-color: var(--accent); animation: neonGlow 1.5s infinite alternate; }
+        .thread-item.event-th { border-color: var(--purple); box-shadow: 0 0 10px rgba(191, 85, 236, 0.2); }
         @keyframes neonGlow { 0% { box-shadow: 0 0 5px rgba(0, 240, 255, 0.1); } 100% { box-shadow: 0 0 12px rgba(0, 240, 255, 0.3); } }
         .thread-icon-box { width: 44px; height: 44px; background: rgba(0, 240, 255, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4em; border: 1px solid rgba(0,240,255,0.2); }
         .thread-main { flex-grow: 1; min-width: 0; }
@@ -68,6 +70,7 @@
         button { width: 100%; padding: 11px; border: none; background: linear-gradient(90deg, #00c6ff, #0072ff); color: #fff; border-radius: 14px; font-weight: bold; cursor: pointer; font-size: 15px; transition: opacity 0.2s; }
         button:active { opacity: 0.8; }
         .btn-pink { background: linear-gradient(90deg, #ff007f, #ff0055); }
+        .btn-purple { background: linear-gradient(90deg, #bf55ec, #9b59b6); }
         .btn-danger { background: linear-gradient(90deg, #ef4444, #dc2626) !important; color: white !important; }
         .btn-small { width: auto; padding: 4px 10px; font-size: 0.75em; margin: 0; background: rgba(128,128,128,0.1); color: var(--text); border-radius: 10px; }
         
@@ -88,7 +91,7 @@
         
         .admin-item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid rgba(128,128,128,0.1); font-size: 0.9em; }
         .admin-sec-title { font-size: 1.1em; font-weight: bold; color: var(--accent); margin: 15px 0 8px 0; border-left: 4px solid var(--accent); padding-left: 8px; }
-        .badge-admin { background: #ffd700; color: #000; font-size: 0.8em; padding: 1px 4px; border-radius: 4px; font-weight: bold; margin-left: 3px; }
+        .badge-title { background: var(--purple); color: #fff; font-size: 0.8em; padding: 1px 5px; border-radius: 4px; font-weight: bold; margin-left: 5px; }
     </style>
 </head>
 <body>
@@ -99,11 +102,13 @@
 <script>
     const AGORA_APP_ID = "1563871745f642a5a5332fe7ee3ebeba"; 
     const ADMIN_USER_ID = "admin"; 
-    const LAST_UPDATE_TIME = "2026/06/20 10:52";
+    const LAST_UPDATE_TIME = "2026/06/20 11:05";
     const SOUND_URL = "https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav";
 
     let currentUserName = "";
     let currentThreadId = null;
+    let currentThreadIsEvent = false;
+    let currentThreadTitleBadge = "";
     let db, client, localAudioTrack;
     let unsubscribeThreads = null, unsubscribePosts = null, unsubscribePresence = null, unsubscribeMembers = null, unsubscribeNotice = null, unsubscribeStatuses = null, unsubscribeAvatars = null, unsubscribeReadReceipts = null;
     let keepAliveInterval = null;
@@ -331,6 +336,8 @@
         if(unsubscribeReadReceipts) unsubscribeReadReceipts();
         updatePresence(null);
         currentThreadId = null;
+        currentThreadIsEvent = false;
+        currentThreadTitleBadge = "";
         leaveCall();
         
         let adminBtn = (currentUserName === ADMIN_USER_ID) ? `<button class="btn-small" style="color:var(--pink);" onclick="showAdminPage()">👑 管理画面</button>` : "";
@@ -381,7 +388,7 @@
             <div class="form-area" style="margin-top:20px;">
                 <div style="font-weight:bold; font-size:0.9em; margin-bottom:5px; color:var(--accent);">🆕 新しいコミュニティ（スレッド）を作る</div>
                 <input type="text" id="newThreadTitle" placeholder="コミュニティのタイトル">
-                <textarea id="firstPost" rows="2" placeholder="最初のつぶやき内容..."></textarea>
+                <textarea id="firstPost" rows="2" placeholder="最初のつぶyき内容..."></textarea>
                 <button onclick="createThread()">コミュニティを開設する</button>
             </div>`;
 
@@ -504,17 +511,24 @@
                     const canDelete = (currentUserName === ADMIN_USER_ID || data.creator === currentUserName);
                     const delBtn = canDelete ? `<span class="del-btn" onclick="event.stopPropagation(); deleteThread('${doc.id}')">🗑️</span>` : "";
                     
-                    const dynamicTalkers = talkers.map(tUid => getNameWithBadge(tUid));
+                    const isEventThread = data.isEvent === true;
+                    const dynamicTalkers = talkers.map(tUid => isEventThread ? "匿名ユーザー" : getNameWithBadge(tUid));
                     const talkersText = talkers.length > 0 ? `<span class="talkers-count">🗣️ ${dynamicTalkers.join(", ")} が通話中</span>` : "";
-                    const callPulseClass = talkers.length > 0 ? 'pulse-neon' : '';
-                    const creatorDisplayName = getNameWithBadge(data.creator || 'unknown');
                     
+                    let cardClasses = 'thread-item';
+                    if (talkers.length > 0) cardClasses += ' pulse-neon';
+                    if (isEventThread) cardClasses += ' event-th';
+
+                    const iconStr = isEventThread ? "🤫" : "💬";
+                    const creatorDisplayName = isEventThread ? "管理者イベント" : getNameWithBadge(data.creator || 'unknown');
+                    const badgeMarkup = isEventThread ? `<span class="badge-title">期間限定イベント</span>` : "";
+
                     area.innerHTML += `
-                        <div class="thread-item ${callPulseClass}" onclick="showThreadDetail('${doc.id}', '${data.title.replace(/'/g, "\\'")}')">
-                            <div class="thread-icon-box">💬</div>
+                        <div class="${cardClasses}" onclick="showThreadDetail('${doc.id}', '${data.title.replace(/'/g, "\\'")}', ${isEventThread}, '${(data.eventBadge || "").replace(/'/g, "\\'")}')">
+                            <div class="thread-icon-box">${iconStr}</div>
                             <div class="thread-main">
                                 <div class="thread-header">
-                                    <span>作成者: ${creatorDisplayName}</span>
+                                    <span>配信元: ${creatorDisplayName} ${badgeMarkup}</span>
                                     <span>${count > 0 ? '👀 ' + count + '人' : ''}</span>
                                 </div>
                                 <div style="font-size:1.05em; font-weight:bold; color:var(--text);">${data.title}</div>
@@ -550,7 +564,7 @@
         triggerThreadRender();
     }
 
-    async function showThreadDetail(id, title) {
+    async function showThreadDetail(id, title, isEvent = false, eventBadge = "") {
         if(unsubscribeThreads) unsubscribeThreads();
         if(unsubscribePosts) unsubscribePosts();
         if(unsubscribeMembers) unsubscribeMembers();
@@ -560,13 +574,22 @@
         
         await updatePresence(id);
         currentThreadId = id;
+        currentThreadIsEvent = isEvent;
+        currentThreadTitleBadge = eventBadge;
         await updateReadReceipt(id);
         
+        const eventAlertArea = isEvent ? `
+            <div style="background:rgba(191, 85, 236, 0.15); border: 2px solid var(--purple); padding:10px; border-radius:15px; margin-bottom:12px; font-size:0.85em; text-align:center; font-weight:bold; color:#fff;">
+                🤫 ここは完全匿名イベント会場です！誰が書いたかは一切秘密になります。<br>発言すると限定称号【${eventBadge}】が付与されます！
+            </div>
+        ` : '';
+
         document.getElementById('root').innerHTML = `
             <div class="nav">
                 <button id="theme-toggle-btn" class="btn-small" onclick="toggleTheme()">${isDarkMode ? '🌙 ダークモード' : '☀️ ライトモード'}</button>
                 <button class="btn-small" onclick="showThreadList()">コミュニティ一覧に戻る</button>
             </div>
+            ${eventAlertArea}
             <h1 style="font-size:1.25em; text-align:left; color:var(--text); text-shadow:none; margin-bottom:5px;">${title}</h1>
             
             <div id="call-status-area" style="margin-bottom:10px; padding:10px; background:rgba(0, 240, 255, 0.02); border:1px dashed var(--accent); border-radius:12px; font-size:0.85em; display:none;">
@@ -623,14 +646,19 @@
             area.innerHTML = "";
             
             posts.forEach(p => {
-                const delBtn = (currentUserName === ADMIN_USER_ID || p.user === currentUserName) ? `<span class="del-btn" onclick="deletePost('${p.id}')">×</span>` : "";
+                const isEvPost = p.isEventPost === true;
+                const delBtn = (currentUserName === ADMIN_USER_ID || (!isEvPost && p.user === currentUserName)) ? `<span class="del-btn" onclick="deletePost('${p.id}')">×</span>` : "";
                 const likes = p.likes || [];
                 const isLiked = likes.includes(currentUserName);
-                const miniInt = p.user.substring(0,2).toUpperCase();
                 
-                const avatarUrl = userAvatars[p.user] || "";
+                let userDisplayName = isEvPost ? "匿名ユーザー" : getNameWithBadge(p.user);
+                if (isEvPost && p.assignedBadge) {
+                    userDisplayName += `<span class="badge-title">${p.assignedBadge}</span>`;
+                }
+                
+                const avatarUrl = isEvPost ? "" : (userAvatars[p.user] || "");
+                const miniInt = isEvPost ? "👤" : p.user.substring(0,2).toUpperCase();
                 const bgStyle = avatarUrl ? `background-image: url('${avatarUrl}'); color:transparent;` : "";
-                const userDisplayName = getNameWithBadge(p.user);
 
                 let readCount = 0;
                 const pTime = p.createdAt ? p.createdAt.toMillis() : Date.now();
@@ -642,9 +670,9 @@
                 const readReceiptText = readCount > 0 ? `<span class="read-count">既読 ${readCount}</span>` : "";
 
                 area.innerHTML += `
-                    <div class="post">
-                        <div class="post-info">
-                            <div class="post-avatar-mini" style="${bgStyle}">${avatarUrl ? '' : miniInt}</div>
+                    <div class="post" style="${isEvPost ? 'border-color: rgba(191,85,236,0.2); background: rgba(191,85,236,0.01);' : ''}">
+                        <div class="post-info" style="${isEvPost ? 'color: var(--purple);' : ''}">
+                            <div class="post-avatar-mini" style="${isEvPost ? 'border-color:var(--purple); color:var(--purple); background:none;' : bgStyle}">${isEvPost ? '👤' : (avatarUrl ? '' : miniInt)}</div>
                             <span>${userDisplayName}</span>
                             ${delBtn}
                         </div>
@@ -701,7 +729,7 @@
         const area = document.getElementById('online-users');
         if(!area) return;
         const allUsers = [currentUserName, ...client.remoteUsers.map(u => u.uid)];
-        const mappedUsers = allUsers.map(uid => getNameWithBadge(uid));
+        const mappedUsers = allUsers.map(uid => currentThreadIsEvent ? "匿名ユーザー" : getNameWithBadge(uid));
         area.innerText = mappedUsers.join(", ");
     }
 
@@ -721,11 +749,20 @@
             <div class="nav"><button class="btn-small" onclick="showThreadList()">⬅️ コミュニティに戻る</button></div>
             <h1>👑 総合管理システム</h1>
             
+            <div class="admin-sec-title">🎉 管理者イベント・称号発行エンジン</div>
+            <div class="form-area">
+                <div style="font-size:0.85em; color:var(--sub-text); margin-bottom:8px;">
+                    イベントを発動すると、指定の名前<b>【管理者実行イベント匿名雑談所】</b>で完全匿名スレッドが立ち上がります。
+                </div>
+                <input type="text" id="eventBadgeInput" placeholder="このイベント限定で配る称号 (例: 夜更かしの神, エリート)">
+                <button onclick="startAdminEvent()" class="btn-purple">⚡ 匿名イベントを実行する</button>
+            </div>
+
             <div class="admin-sec-title">👤 利用申請・登録ユーザー一覧</div>
-            <div id="admin-user-list" class="form-area" style="max-height: 250px; overflow-y: auto;">読み込み中...</div>
+            <div id="admin-user-list" class="form-area" style="max-height: 200px; overflow-y: auto;">読み込み中...</div>
 
             <div class="admin-sec-title">💬 全コミュニティ（スレッド）管理</div>
-            <div id="admin-thread-list" class="form-area" style="max-height: 250px; overflow-y: auto;">読み込み中...</div>`;
+            <div id="admin-thread-list" class="form-area" style="max-height: 200px; overflow-y: auto;">読み込み中...</div>`;
             
         db.collection("requests").orderBy("createdAt", "desc").onSnapshot(ss => {
             const area = document.getElementById('admin-user-list');
@@ -757,7 +794,7 @@
             area.innerHTML = "";
             ss.forEach(doc => {
                 const t = doc.data();
-                const creatorDisplayName = getNameWithBadge(t.creator);
+                const creatorDisplayName = t.isEvent ? "管理者イベント" : getNameWithBadge(t.creator);
                 area.innerHTML += `
                     <div class="admin-item-row">
                         <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:70%;"><b>${t.title}</b> <small style="color:var(--sub-text);">by ${creatorDisplayName}</small></span>
@@ -765,6 +802,35 @@
                     </div>`;
             });
         });
+    }
+
+    async function startAdminEvent() {
+        const badge = document.getElementById("eventBadgeInput").value.trim();
+        if(!badge) return alert("このイベントで獲得できる称号を入力してください！");
+        
+        const fixedTitle = "【管理者実行イベント匿名雑談所】";
+        
+        if(!confirm(`タイトル: ${fixedTitle}\n称号: 【${badge}】\nでイベント用の匿名スレを生成しますか？`)) return;
+        
+        const threadRef = await db.collection("threads").add({
+            title: fixedTitle,
+            creator: currentUserName,
+            isEvent: true,
+            eventBadge: badge,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        await db.collection("posts").add({
+            threadId: threadRef.id,
+            user: currentUserName,
+            text: `🎉 管理者イベントが開始されました！ここでの発言はすべて匿名となり、特別称号【${badge}】が付与されます！みんな集まれー！`,
+            isEventPost: true,
+            assignedBadge: badge,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        alert("イベントスレッドを作成しました！広場に公開されています。");
+        showThreadList();
     }
 
     async function approveUser(docId) {
@@ -791,15 +857,24 @@
         const title = document.getElementById('newThreadTitle').value.trim();
         const text = document.getElementById('firstPost').value.trim();
         if(!title || !text) return alert("タイトルと言葉を入力してね");
-        const threadRef = await db.collection("threads").add({ title, creator: currentUserName, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-        await db.collection("posts").add({ threadId: threadRef.id, user: currentUserName, text, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-        showThreadDetail(threadRef.id, title);
+        const threadRef = await db.collection("threads").add({ title, creator: currentUserName, isEvent: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        await db.collection("posts").add({ threadId: threadRef.id, user: currentUserName, text, isEventPost: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        showThreadDetail(threadRef.id, title, false);
     }
 
     async function sendReply() {
         const text = document.getElementById('replyText').value;
         if(!text.trim()) return;
-        await db.collection("posts").add({ threadId: currentThreadId, user: currentUserName, text, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        
+        await db.collection("posts").add({ 
+            threadId: currentThreadId, 
+            user: currentUserName, 
+            text: text, 
+            isEventPost: currentThreadIsEvent,
+            assignedBadge: currentThreadIsEvent ? currentThreadTitleBadge : "",
+            createdAt: firebase.firestore.FieldValue.serverTimestamp() 
+        });
+        
         document.getElementById('replyText').value = "";
         await updateReadReceipt(currentThreadId);
     }
