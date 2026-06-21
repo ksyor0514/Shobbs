@@ -627,6 +627,47 @@
         });
         document.getElementById('replyText').value = "";
     }
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script>
+        // 1. あなたのPCのバックエンドサーバー（3000番ポート）に接続
+        const adminSocket = io('http://localhost:3000'); 
+
+        // 2. サーバーからメンテナンス状態を受け取ったときの処理
+        adminSocket.on('server_maintenance_status', (data) => {
+            if (data.isMaintenance) {
+                // 【メンテ開始】画面全体をハックして、ネオングリーンの世界に変える！
+                if (!document.getElementById('maintenance-screen')) {
+                    const mentScreen = document.createElement('div');
+                    mentScreen.id = 'maintenance-screen';
+                    
+                    // ここでメンテ画面のデザイン（黒背景×ネオングリーン）を作ってるよ
+                    mentScreen.style.cssText = 'background:#0a0f0d; color:#39ff14; height:100vh; width:100vw; display:flex; flex-direction:column; justify-content:center; align-items:center; font-family:monospace; text-align:center; position:fixed; top:0; left:0; z-index:999999; padding:20px; box-sizing:border-box;';
+                    mentScreen.innerHTML = `
+                        <h1 style="font-size:3rem; text-shadow:0 0 10px #39ff14; margin:0; letter-spacing: 2px;">⚠️ SYSTEM MAINTENANCE</h1>
+                        <p id="ment-msg" style="font-size:1.5rem; color:#fff; margin-top:25px; white-space:pre-wrap; border: 1px dashed #1f3a2b; padding: 15px; background: #121b18; border-radius: 5px; min-width: 300px;"></p>
+                        <p style="color:#888; margin-top:50px; font-size:0.9rem;">管理者がメンテナンスを終了するまでしばらくお待ちください...</p>
+                    `;
+                    document.body.appendChild(mentScreen);
+                }
+                // 管理者が打ち込んだカスタムメッセージをリアルタイムに反映！
+                document.getElementById('ment-msg').innerText = data.maintenanceMessage;
+            } else {
+                // 【メンテ終了】メンテ画面を跡形もなく消し去って、元のSNS画面を復活させる！
+                const screen = document.getElementById('maintenance-screen');
+                if (screen) {
+                    screen.remove(); 
+                }
+            }
+        });
+
+        // 3. サーバーからキック命令が飛んできたときの処理
+        adminSocket.on('server_kick_command', (username) => {
+            // テスト用（管理者パネルのKICKボタンで反応するよ）
+            if (username === 'Target_User' || username === 'GUEST_01') { 
+                alert("管理者に強制キックされました。");
+                window.location.href = "about:blank"; // 白い画面（虚無）に飛ばす
+            }
+        });
 </script>
 </body>
 </html>
