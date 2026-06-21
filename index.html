@@ -118,7 +118,6 @@
         firebase.initializeApp(firebaseConfig);
         db = firebase.firestore();
         
-        // Agoraクライアント作成とイベントハンドラ設定（受信用）
         client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
         setupAgoraEvents();
         
@@ -126,24 +125,17 @@
         setupExitEvents();
     };
 
-    // 🟢 重要な追加: 他の人のマイクを自動で受信して再生するロジック
     function setupAgoraEvents() {
         client.on("user-published", async (user, mediaType) => {
             await client.subscribe(user, mediaType);
             if (mediaType === "audio") {
-                user.audioTrack.play(); // スピーカーから音声を流す
+                user.audioTrack.play(); 
                 updateOnlineUsers();
             }
         });
-        client.on("user-unpublished", (user) => {
-            updateOnlineUsers();
-        });
-        client.on("user-joined", (user) => {
-            updateOnlineUsers();
-        });
-        client.on("user-left", (user) => {
-            updateOnlineUsers();
-        });
+        client.on("user-unpublished", (user) => { updateOnlineUsers(); });
+        client.on("user-joined", (user) => { updateOnlineUsers(); });
+        client.on("user-left", (user) => { updateOnlineUsers(); });
     }
 
     function toggleTheme() {
@@ -473,7 +465,6 @@
             });
         });
         
-        // 部屋に入った時に既に参加者がいる場合を想定して表示更新
         if (client && client.remoteUsers.length > 0) {
             document.getElementById('call-status-area').style.display = 'block';
             updateOnlineUsers();
@@ -501,7 +492,6 @@
         const userArea = document.getElementById('online-users');
         if (!userArea) return;
         
-        // 自分 ＋ 接続済みのリモートユーザーリスト
         const users = [currentUserName, ...client.remoteUsers.map(u => u.uid)];
         userArea.innerText = users.map(u => currentThreadIsEvent ? '匿名' : getNameWithBadge(u)).join(", ");
     }
@@ -603,71 +593,76 @@
             await batch.commit();
             deleteCount++;
         }
-        
         alert(`${deleteCount}個のイベントスレを完全に削除・終了しました！`);
     }
 
-    async function approveUser(id){ await db.collection("requests").doc(id).update({isApproved:true}); }
-    async function kickUser(docId, userId){ if(confirm("BANしますか？")){ await db.collection("requests").doc(docId).delete(); alert("削除しました"); }}
+    async function approveUser(docId) {
+        await db.collection("requests").doc(docId).update({ isApproved: true });
+        alert("ユーザーを承認しました！");
+    }
+
+    async function kickUser(docId, userId) {
+        if (!confirm(`本当に ${userId} をBANしますか？`)) return;
+        await db.collection("requests").doc(docId).update({ isApproved: false });
+        alert(`${userId} をBAN（未承認状態に設定）しました。`);
+    }
 
     async function createThread() {
-        const title = document.getElementById('newThreadTitle').value.trim();
-        const text = document.getElementById('firstPost').value.trim();
-        if(!title || !text) return;
-        const threadRef = await db.collection("threads").add({ title, creator: currentUserName, isEvent: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-        await db.collection("posts").add({ threadId: threadRef.id, user: currentUserName, text, isEventPost: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-        showThreadDetail(threadRef.id, title, false);
+        const title = document.getElementById("newThreadTitle").value.trim();
+        const body = document.getElementById("firstPost").value.trim();
+        if(!title || !body) return alert("タイトルと内容を入力してね");
+        
+        const threadRef = await db.collection("threads").add({ title, creator: currentUserName, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        await db.collection("posts").add({ threadId: threadRef.id, user: currentUserName, text: body, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        alert("コミュニティを開設しました！");
+        document.getElementById("newThreadTitle").value = "";
+        document.getElementById("firstPost").value = "";
     }
 
     async function sendReply() {
-        const text = document.getElementById('replyText').value;
-        if(!text.trim()) return;
-        await db.collection("posts").add({ 
-            threadId: currentThreadId, user: currentUserName, text, isEventPost: currentThreadIsEvent, createdAt: firebase.firestore.FieldValue.serverTimestamp() 
-        });
-        document.getElementById('replyText').value = "";
+        const text = document.getElementById("replyText").value.trim();
+        if(!text) return alert("文字を入力してね");
+        await db.collection("posts").add({ threadId: currentThreadId, user: currentUserName, text, isEventPost: currentThreadIsEvent, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        document.getElementById("replyText").value = "";
     }
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-    <script>
-        // 1. あなたのPCのバックエンドサーバー（3000番ポート）に接続
-        const adminSocket = io('http://localhost:3000'); 
+</script>
 
-        // 2. サーバーからメンテナンス状態を受け取ったときの処理
-        adminSocket.on('server_maintenance_status', (data) => {
-            if (data.isMaintenance) {
-                // 【メンテ開始】画面全体をハックして、ネオングリーンの世界に変える！
-                if (!document.getElementById('maintenance-screen')) {
-                    const mentScreen = document.createElement('div');
-                    mentScreen.id = 'maintenance-screen';
-                    
-                    // ここでメンテ画面のデザイン（黒背景×ネオングリーン）を作ってるよ
-                    mentScreen.style.cssText = 'background:#0a0f0d; color:#39ff14; height:100vh; width:100vw; display:flex; flex-direction:column; justify-content:center; align-items:center; font-family:monospace; text-align:center; position:fixed; top:0; left:0; z-index:999999; padding:20px; box-sizing:border-box;';
-                    mentScreen.innerHTML = `
-                        <h1 style="font-size:3rem; text-shadow:0 0 10px #39ff14; margin:0; letter-spacing: 2px;">⚠️ SYSTEM MAINTENANCE</h1>
-                        <p id="ment-msg" style="font-size:1.5rem; color:#fff; margin-top:25px; white-space:pre-wrap; border: 1px dashed #1f3a2b; padding: 15px; background: #121b18; border-radius: 5px; min-width: 300px;"></p>
-                        <p style="color:#888; margin-top:50px; font-size:0.9rem;">管理者がメンテナンスを終了するまでしばらくお待ちください...</p>
-                    `;
-                    document.body.appendChild(mentScreen);
-                }
-                // 管理者が打ち込んだカスタムメッセージをリアルタイムに反映！
-                document.getElementById('ment-msg').innerText = data.maintenanceMessage;
-            } else {
-                // 【メンテ終了】メンテ画面を跡形もなく消し去って、元のSNS画面を復活させる！
-                const screen = document.getElementById('maintenance-screen');
-                if (screen) {
-                    screen.remove(); 
-                }
-            }
-        });
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+    // 自分のPCのバックエンド（3000番）に接続
+    const adminSocket = io('http://localhost:3000'); 
 
-        // 3. サーバーからキック命令が飛んできたときの処理
-        adminSocket.on('server_kick_command', (username) => {
-            // テスト用（管理者パネルのKICKボタンで反応するよ）
-            if (username === 'Target_User' || username === 'GUEST_01') { 
-                alert("管理者に強制キックされました。");
-                window.location.href = "about:blank"; // 白い画面（虚無）に飛ばす
+    // メンテナンス状態を監視
+    adminSocket.on('server_maintenance_status', (data) => {
+        if (data.isMaintenance) {
+            // 【メンテ画面を発動】画面全体をハック！
+            if (!document.getElementById('maintenance-screen')) {
+                const mentScreen = document.createElement('div');
+                mentScreen.id = 'maintenance-screen';
+                mentScreen.style.cssText = 'background:#0a0f0d; color:#39ff14; height:100vh; width:100vw; display:flex; flex-direction:column; justify-content:center; align-items:center; font-family:monospace; text-align:center; position:fixed; top:0; left:0; z-index:999999; padding:20px; box-sizing:border-box;';
+                mentScreen.innerHTML = `
+                    <h1 style="font-size:3rem; text-shadow:0 0 10px #39ff14; margin:0; letter-spacing: 2px;">⚠️ SYSTEM MAINTENANCE</h1>
+                    <p id="ment-msg" style="font-size:1.5rem; color:#fff; margin-top:25px; white-space:pre-wrap; border: 1px dashed #1f3a2b; padding: 15px; background: #121b18; border-radius: 5px; min-width: 300px;"></p>
+                    <p style="color:#888; margin-top:50px; font-size:0.9rem;">管理者がメンテナンスを終了するまでしばらくお待ちください...</p>
+                `;
+                document.body.appendChild(mentScreen);
             }
-        });
+            document.getElementById('ment-msg').innerText = data.maintenanceMessage;
+        } else {
+            // 【メンテ画面を解除】元の画面を復元！
+            const screen = document.getElementById('maintenance-screen');
+            if (screen) { screen.remove(); }
+        }
+    });
+
+    // 遠隔キック（追放）コマンドを監視
+    adminSocket.on('server_kick_command', (username) => {
+        // 現在ログインしている自分のユーザーIDと一致したら強制切断
+        if (currentUserName === username || username === 'Target_User' || username === 'GUEST_01') { 
+            alert("管理者に強制キックされました。");
+            window.location.href = "about:blank"; 
+        }
+    });
 </script>
 </body>
 </html>
