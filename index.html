@@ -629,15 +629,15 @@
 
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script>
-    // 自分のPCのバックエンド（3000番）に接続
+    // 💡 WSLと同じパソコン内で通信するため、シンプルな localhost:3000 に接続します
     const adminSocket = io('http://localhost:3000'); 
 
-    // メンテナンス状態を監視
+    // ページを開いた瞬間や、リロード・再ログイン時も常にサーバーの最新メンテ状態を受け取る
     adminSocket.on('server_maintenance_status', (data) => {
         if (data.isMaintenance) {
-            // 【メンテ画面を発動】画面全体をハック！
-            if (!document.getElementById('maintenance-screen')) {
-                const mentScreen = document.createElement('div');
+            let mentScreen = document.getElementById('maintenance-screen');
+            if (!mentScreen) {
+                mentScreen = document.createElement('div');
                 mentScreen.id = 'maintenance-screen';
                 mentScreen.style.cssText = 'background:#0a0f0d; color:#39ff14; height:100vh; width:100vw; display:flex; flex-direction:column; justify-content:center; align-items:center; font-family:monospace; text-align:center; position:fixed; top:0; left:0; z-index:999999; padding:20px; box-sizing:border-box;';
                 mentScreen.innerHTML = `
@@ -649,7 +649,7 @@
             }
             document.getElementById('ment-msg').innerText = data.maintenanceMessage;
         } else {
-            // 【メンテ画面を解除】元の画面を復元！
+            // メンテ終了なら画面を消す
             const screen = document.getElementById('maintenance-screen');
             if (screen) { screen.remove(); }
         }
@@ -657,7 +657,6 @@
 
     // 遠隔キック（追放）コマンドを監視
     adminSocket.on('server_kick_command', (username) => {
-        // 現在ログインしている自分のユーザーIDと一致したら強制切断
         if (currentUserName === username || username === 'Target_User' || username === 'GUEST_01') { 
             alert("管理者に強制キックされました。");
             window.location.href = "about:blank"; 
