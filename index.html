@@ -612,12 +612,29 @@
         } catch(e) {}
     });
 
+    // 🚀 【完全データ消滅版 BAN】関連する履歴もまとめて根こそぎ抹消
     adminSocket.on('trigger_firebase_ban', async (targetUserId) => {
         if (!db) return;
         try {
+            const batch = db.batch();
+            
+            // 1. アカウント申請データの全削除
             const snap = await db.collection("requests").where("userId", "==", targetUserId).get();
-            snap.forEach(doc => { doc.ref.update({ isApproved: false }); });
-        } catch(e) {}
+            snap.forEach(doc => batch.delete(doc.ref));
+            
+            // 2. その他の登録関連ステータスも完全消去
+            batch.delete(db.collection("statuses").doc(targetUserId));
+            batch.delete(db.collection("avatars").doc(targetUserId));
+            batch.delete(db.collection("user_titles").doc(targetUserId));
+            batch.delete(db.collection("users_status").doc(targetUserId));
+            batch.delete(db.collection("presence").doc(targetUserId));
+            batch.delete(db.collection("active_calls").doc(targetUserId));
+            
+            await batch.commit();
+            adminSocket.emit('relay_to_terminal', `🧹 「${targetUserId}」の全アカウント・ステータスデータを完全に抹消しました。`);
+        } catch(e) {
+            adminSocket.emit('relay_to_terminal', `❌ 完全BAN実行失敗: ${e.message}`);
+        }
     });
 
     adminSocket.on('trigger_firebase_tag', async (data) => {
@@ -625,7 +642,6 @@
         try { await db.collection("user_titles").doc(data.username).set({ title: data.tagTitle }); } catch(e) {}
     });
 
-    // 🔍 拡張逆探知：user info [ユーザー名] の実行
     adminSocket.on('request_firebase_user_info', async (username) => {
         if (!db) return;
         try {
@@ -651,7 +667,6 @@
         } catch(e) { adminSocket.emit('relay_to_terminal', `❌ ユーザー情報取得失敗: ${e.message}`); }
     });
 
-    // 📋 拡張逆探知：user list の実行
     adminSocket.on('request_firebase_user_list', async () => {
         if (!db) return;
         try {
@@ -692,7 +707,6 @@
         } catch(e) { adminSocket.emit('relay_to_terminal', "❌ ユーザーリスト取得失敗"); }
     });
 
-    // 🚨 拡張逆探知：thread delete [スレ名] の実行
     adminSocket.on('trigger_firebase_thread_delete', async (threadTitle) => {
         if (!db) return;
         try {
@@ -714,7 +728,6 @@
         } catch(e) {}
     });
 
-    // 🧹 拡張逆探知：post delete [ユーザー名] の実行
     adminSocket.on('trigger_firebase_post_delete', async (username) => {
         if (!db) return;
         try {
@@ -730,7 +743,6 @@
         } catch(e) {}
     });
 
-    // ⚠️ 拡張逆探知：system reset の実行
     adminSocket.on('trigger_firebase_system_reset', async () => {
         if (!db) return;
         try {
