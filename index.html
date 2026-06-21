@@ -39,8 +39,6 @@
         h1 { text-align: center; color: var(--accent); letter-spacing: 1px; margin: 5px 0; font-size: 1.6em; font-weight: 900; text-shadow: 0 0 6px rgba(0, 240, 255, 0.2); }
         .last-update-tag { text-align: center; font-size: 0.7em; color: var(--sub-text); margin-bottom: 20px; font-weight: bold; }
         
-        .search-bar { display: flex; gap: 6px; margin-bottom: 12px; }
-        .search-bar input { margin: 0; }
         .tabs { display: flex; gap: 8px; margin-bottom: 15px; border-bottom: 2px solid rgba(128,128,128,0.1); padding-bottom: 8px; }
         .tab-btn { background: transparent; border: 2px solid transparent; color: var(--sub-text); padding: 6px 16px; border-radius: 20px; font-size: 0.85em; font-weight: bold; width: auto; cursor: pointer; transition: all 0.2s; }
         .tab-btn.active { background: var(--accent); color: #000; border-color: var(--accent); box-shadow: 0 0 8px rgba(0,240,255,0.3); }
@@ -54,9 +52,7 @@
 
         .thread-item { background: rgba(128, 128, 128, 0.03); border: 2px solid rgba(128, 128, 128, 0.12); padding: 14px; margin-bottom: 12px; cursor: pointer; border-radius: 20px; position: relative; transition: transform 0.15s, border-color 0.15s; display: flex; align-items: center; gap: 12px; }
         .thread-item:hover { transform: translateY(-2px); border-color: var(--accent); }
-        .thread-item.pulse-neon { border-color: var(--accent); animation: neonGlow 1.5s infinite alternate; }
         .thread-item.event-th { border-color: var(--purple); box-shadow: 0 0 10px rgba(191, 85, 236, 0.15); }
-        @keyframes neonGlow { 0% { box-shadow: 0 0 5px rgba(0, 240, 255, 0.1); } 100% { box-shadow: 0 0 12px rgba(0, 240, 255, 0.3); } }
         .thread-icon-box { width: 44px; height: 44px; background: rgba(0, 240, 255, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4em; border: 1px solid rgba(0,240,255,0.2); }
         .thread-main { flex-grow: 1; min-width: 0; }
         .thread-header { display: flex; justify-content: space-between; font-size: 0.75em; color: var(--sub-text); margin-bottom: 3px; }
@@ -76,7 +72,6 @@
         
         .post { background: rgba(128, 128, 128, 0.02); border: 2px solid rgba(128, 128, 128, 0.08); padding: 12px; margin-bottom: 12px; border-radius: 20px; }
         .post-info { display: flex; align-items: center; gap: 8px; color: var(--accent); font-size: 0.8em; margin-bottom: 6px; }
-        .post-avatar-mini { width: 24px; height: 24px; background: #1b1e36; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7em; border: 1px solid var(--accent); background-size: cover; background-position: center; }
         .post-body { font-size: 0.95em; color: var(--text); white-space: pre-wrap; word-break: break-all; }
         
         .nav { display: flex; justify-content: space-between; margin-bottom: 12px; gap: 6px; align-items: center; }
@@ -95,8 +90,7 @@
 <script>
     const AGORA_APP_ID = "1563871745f642a5a5332fe7ee3ebeba"; 
     const ADMIN_USER_ID = "admin"; 
-    const LAST_UPDATE_TIME = "2026/06/20 11:40";
-    const SOUND_URL = "https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav";
+    const LAST_UPDATE_TIME = "2026/06/21 13:10";
 
     let currentUserName = "";
     let currentThreadId = null;
@@ -104,8 +98,6 @@
     let db, client, localAudioTrack;
     let unsubscribeThreads = null, unsubscribePosts = null, unsubscribePresence = null, unsubscribeMembers = null, unsubscribeNotice = null, unsubscribeStatuses = null, unsubscribeAvatars = null, unsubscribeTitles = null;
     let keepAliveInterval = null;
-    let originalTitle = document.title;
-    let blinkInterval = null;
     let userStatuses = {};
     let userAvatars = {};
     let userTitles = {};
@@ -125,10 +117,34 @@
     window.onload = () => {
         firebase.initializeApp(firebaseConfig);
         db = firebase.firestore();
+        
+        // Agoraクライアント作成とイベントハンドラ設定（受信用）
         client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+        setupAgoraEvents();
+        
         showLoginPage();
         setupExitEvents();
     };
+
+    // 🟢 重要な追加: 他の人のマイクを自動で受信して再生するロジック
+    function setupAgoraEvents() {
+        client.on("user-published", async (user, mediaType) => {
+            await client.subscribe(user, mediaType);
+            if (mediaType === "audio") {
+                user.audioTrack.play(); // スピーカーから音声を流す
+                updateOnlineUsers();
+            }
+        });
+        client.on("user-unpublished", (user) => {
+            updateOnlineUsers();
+        });
+        client.on("user-joined", (user) => {
+            updateOnlineUsers();
+        });
+        client.on("user-left", (user) => {
+            updateOnlineUsers();
+        });
+    }
 
     function toggleTheme() {
         isDarkMode = !isDarkMode;
@@ -142,7 +158,7 @@
     function setupExitEvents() {
         document.addEventListener("visibilitychange", () => {
             if (document.visibilityState === "hidden") { goOfflineSync(); } 
-            else if (currentUserName) { keepAlive(); stopTitleBlink(); }
+            else if (currentUserName) { keepAlive(); }
         });
         window.addEventListener("beforeunload", () => { goOfflineSync(); });
     }
@@ -456,30 +472,49 @@
                     </div>`;
             });
         });
+        
+        // 部屋に入った時に既に参加者がいる場合を想定して表示更新
+        if (client && client.remoteUsers.length > 0) {
+            document.getElementById('call-status-area').style.display = 'block';
+            updateOnlineUsers();
+        }
     }
 
     async function joinCall(channelId) {
-        await client.join(AGORA_APP_ID, channelId, null, currentUserName);
-        await db.collection("active_calls").doc(currentUserName).set({ threadId: channelId });
-        localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-        await client.publish([localAudioTrack]);
-        document.getElementById('join-btn').style.display = 'none';
-        document.getElementById('leave-btn').style.display = 'block';
-        document.getElementById('call-status-area').style.display = 'block';
-        updateOnlineUsers();
+        try {
+            await client.join(AGORA_APP_ID, channelId, null, currentUserName);
+            await db.collection("active_calls").doc(currentUserName).set({ threadId: channelId });
+            
+            localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+            await client.publish([localAudioTrack]);
+            
+            document.getElementById('join-btn').style.display = 'none';
+            document.getElementById('leave-btn').style.display = 'block';
+            document.getElementById('call-status-area').style.display = 'block';
+            updateOnlineUsers();
+        } catch(err) {
+            alert("通話への参加に失敗しました。マイクの許可を確認してください: " + err.message);
+        }
     }
 
     function updateOnlineUsers() {
+        const userArea = document.getElementById('online-users');
+        if (!userArea) return;
+        
+        // 自分 ＋ 接続済みのリモートユーザーリスト
         const users = [currentUserName, ...client.remoteUsers.map(u => u.uid)];
-        document.getElementById('online-users').innerText = users.map(u=>currentThreadIsEvent?'匿名':getNameWithBadge(u)).join(", ");
+        userArea.innerText = users.map(u => currentThreadIsEvent ? '匿名' : getNameWithBadge(u)).join(", ");
     }
 
     async function leaveCall() {
         if(localAudioTrack){ localAudioTrack.stop(); localAudioTrack.close(); localAudioTrack=null; }
         await client.leave();
-        await db.collection("active_calls").doc(currentUserName).delete();
+        if (currentUserName) {
+            await db.collection("active_calls").doc(currentUserName).delete();
+        }
         if(document.getElementById('join-btn')) document.getElementById('join-btn').style.display = 'block';
         if(document.getElementById('leave-btn')) document.getElementById('leave-btn').style.display = 'none';
+        if(document.getElementById('call-status-area')) document.getElementById('call-status-area').style.display = 'none';
     }
 
     async function showAdminPage() {
@@ -553,7 +588,6 @@
         alert("イベントスレッドを作成しました！");
     }
 
-    // 🚨 特設スレをDBから全削除する関数
     async function deleteAdminEvent() {
         if (!confirm("本当に【管理者実行イベント匿名雑談所】を終了して削除しますか？")) return;
         
@@ -562,7 +596,6 @@
 
         let deleteCount = 0;
         for (const doc of snap.docs) {
-            // スレッド内の投稿もあわせて削除
             const postsSnap = await db.collection("posts").where("threadId", "==", doc.id).get();
             const batch = db.batch();
             postsSnap.forEach(postDoc => batch.delete(postDoc.ref));
