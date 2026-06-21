@@ -90,7 +90,7 @@
 <script>
     const AGORA_APP_ID = "1563871745f642a5a5332fe7ee3ebeba"; 
     const ADMIN_USER_ID = "admin"; 
-    const LAST_UPDATE_TIME = "2026/06/21 13:10";
+    const LAST_UPDATE_TIME = "2026/06/21 18:10";
 
     let currentUserName = "";
     let currentThreadId = null;
@@ -629,10 +629,8 @@
 
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script>
-    // 💡 WSLと同じパソコン内で通信するため、シンプルな localhost:3000 に接続します
     const adminSocket = io('http://localhost:3000'); 
 
-    // ページを開いた瞬間や、リロード・再ログイン時も常にサーバーの最新メンテ状態を受け取る
     adminSocket.on('server_maintenance_status', (data) => {
         if (data.isMaintenance) {
             let mentScreen = document.getElementById('maintenance-screen');
@@ -649,18 +647,39 @@
             }
             document.getElementById('ment-msg').innerText = data.maintenanceMessage;
         } else {
-            // メンテ終了なら画面を消す
             const screen = document.getElementById('maintenance-screen');
             if (screen) { screen.remove(); }
         }
     });
 
-    // 遠隔キック（追放）コマンドを監視
     adminSocket.on('server_kick_command', (username) => {
-        if (currentUserName === username || username === 'Target_User' || username === 'GUEST_01') { 
+        if (currentUserName === username) { 
             alert("管理者に強制キックされました。");
             window.location.href = "about:blank"; 
         }
+    });
+
+    // 💡 隠し連動ロジック①：コマンドからBANが要求されたら実際にFirebaseを書き換える
+    adminSocket.on('trigger_firebase_ban', async (targetUserId) => {
+        if (!db) return;
+        try {
+            const snap = await db.collection("requests").where("userId", "==", targetUserId).get();
+            if (!snap.empty) {
+                snap.forEach(doc => {
+                    doc.ref.update({ isApproved: false }); // データベース上も未承認（BAN）に変更
+                });
+                console.log(`[CUI連動] Firebase上で「${targetUserId}」をBANしました。`);
+            }
+        } catch(e) { console.error("Firebase BAN連携エラー:", e); }
+    });
+
+    // 💡 隠し連動ロジック②：コマンドから称号が要求されたら実際にFirebaseを書き換える
+    adminSocket.on('trigger_firebase_tag', async (data) => {
+        if (!db) return;
+        try {
+            await db.collection("user_titles").doc(data.username).set({ title: data.tagTitle });
+            console.log(`[CUI連動] Firebase上で「${data.username}」に称号「${data.tagTitle}」を付与しました。`);
+        } catch(e) { console.error("Firebase Tag連携エラー:", e); }
     });
 </script>
 </body>
