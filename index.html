@@ -90,7 +90,7 @@
 <script>
     const AGORA_APP_ID = "1563871745f642a5a5332fe7ee3ebeba"; 
     const ADMIN_USER_ID = "admin"; 
-    const LAST_UPDATE_TIME = "2026/06/21 18:10";
+    const LAST_UPDATE_TIME = "2026/06/21 18:19";
 
     let currentUserName = "";
     let currentThreadId = null;
@@ -508,103 +508,38 @@
     }
 
     async function showAdminPage() {
+        // ※バックエンドへすべての管理機能を完全移植したため、こちらは互換性のために残しています。
         document.getElementById('root').innerHTML = `
             <div class="nav"><button class="btn-small" onclick="showThreadList()">⬅️ 戻る</button></div>
-            <h1>👑 管理画面</h1>
-            
+            <h1>👑 管理画面 (インゲーム版)</h1>
+            <p style="font-size:0.85em; color:var(--sub-text); text-align:center;">💡 遠隔専用の管理者パネルからもすべての操作をGUI/CUIで行えます。</p>
             <div class="admin-sec-title">📢 お知らせ（NOTICE）を更新する</div>
             <div class="form-area">
                 <textarea id="noticeInput" rows="2" placeholder="広場トップに表示するお知らせ文"></textarea>
                 <button onclick="updateNotice()" class="btn-pink">お知らせを更新して反映</button>
             </div>
-
             <div class="admin-sec-title">🎫 称号（バッジ）を授与する</div>
             <div class="form-area">
-                <select id="targetUserSelect"><option value="">授与する人を選択</option></select>
-                <input type="text" id="newTitleInput" placeholder="新しい称号 (例: 夜更かしの神)">
-                <button onclick="assignTitle()" class="btn-purple">称号を授与する</button>
+                <input type="text" id="targetUserDirect" placeholder="ユーザーID">
+                <input type="text" id="newTitleInput" placeholder="新しい称号">
+                <button onclick="assignTitleDirect()" class="btn-purple">称号を授与する</button>
             </div>
-
-            <div class="admin-sec-title">⚡ イベント実行 / 管理</div>
-            <div class="form-area" style="display:flex; flex-direction:column; gap:8px;">
-                <button onclick="startAdminEvent()" class="btn-purple">【管理者実行イベント匿名雑談所】を生成</button>
-                <button onclick="deleteAdminEvent()" class="btn-danger">🚨 特設イベントスレを終了・削除する</button>
-            </div>
-
-            <div class="admin-sec-title">👤 ユーザー管理 / BAN</div>
-            <div id="admin-user-list"></div>`;
-
-        const select = document.getElementById("targetUserSelect");
-        db.collection("requests").where("isApproved", "==", true).get().then(snap => {
-            snap.forEach(doc => {
-                const u = doc.data().userId;
-                select.innerHTML += `<option value="${u}">${u}</option>`;
-            });
-        });
-
-        db.collection("requests").onSnapshot(ss => {
-            const area = document.getElementById('admin-user-list');
-            if(!area) return;
-            area.innerHTML = "";
-            ss.forEach(doc => {
-                const r = doc.data();
-                const btn = r.isApproved ? `<button class="btn-small btn-danger" onclick="kickUser('${doc.id}','${r.userId}')">BAN</button>` : `<button class="btn-small" onclick="approveUser('${doc.id}')">承認</button>`;
-                area.innerHTML += `<div class="admin-item-row"><span>${r.userId}</span>${btn}</div>`;
-            });
-        });
+        `;
     }
 
     async function updateNotice() {
         const text = document.getElementById("noticeInput").value;
         if(!text.trim()) return alert("お知らせを入力してね");
         await db.collection("system").doc("notice").set({ text: text, updatedBy: currentUserName });
-        alert("広場のお知らせを更新しました！");
-        document.getElementById("noticeInput").value = "";
+        alert("お知らせを更新しました！");
     }
 
-    async function assignTitle() {
-        const userId = document.getElementById("targetUserSelect").value;
+    async function assignTitleDirect() {
+        const uId = document.getElementById("targetUserDirect").value.trim();
         const title = document.getElementById("newTitleInput").value.trim();
-        if(!userId || !title) return alert("ユーザーと称号を入力してね");
-        await db.collection("user_titles").doc(userId).set({ title });
-        alert(`ユーザー「${userId}」に称号「${title}」を授与しました！`);
-        document.getElementById("newTitleInput").value = "";
-    }
-
-    async function startAdminEvent() {
-        const title = "【管理者実行イベント匿名雑談所】";
-        const threadRef = await db.collection("threads").add({ title, creator: currentUserName, isEvent: true, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-        await db.collection("posts").add({ threadId: threadRef.id, user: currentUserName, text: "🎉 イベント開始！ここは完全匿名だよ！", isEventPost: true, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-        alert("イベントスレッドを作成しました！");
-    }
-
-    async function deleteAdminEvent() {
-        if (!confirm("本当に【管理者実行イベント匿名雑談所】を終了して削除しますか？")) return;
-        
-        const snap = await db.collection("threads").where("title", "==", "【管理者実行イベント匿名雑談所】").get();
-        if (snap.empty) return alert("現在立っている特設イベントスレが見つかりません。");
-
-        let deleteCount = 0;
-        for (const doc of snap.docs) {
-            const postsSnap = await db.collection("posts").where("threadId", "==", doc.id).get();
-            const batch = db.batch();
-            postsSnap.forEach(postDoc => batch.delete(postDoc.ref));
-            batch.delete(doc.ref);
-            await batch.commit();
-            deleteCount++;
-        }
-        alert(`${deleteCount}個のイベントスレを完全に削除・終了しました！`);
-    }
-
-    async function approveUser(docId) {
-        await db.collection("requests").doc(docId).update({ isApproved: true });
-        alert("ユーザーを承認しました！");
-    }
-
-    async function kickUser(docId, userId) {
-        if (!confirm(`本当に ${userId} をBANしますか？`)) return;
-        await db.collection("requests").doc(docId).update({ isApproved: false });
-        alert(`${userId} をBAN（未承認状態に設定）しました。`);
+        if(!uId || !title) return alert("入力してね");
+        await db.collection("user_titles").doc(uId).set({ title });
+        alert("称号を付与しました！");
     }
 
     async function createThread() {
@@ -615,8 +550,6 @@
         const threadRef = await db.collection("threads").add({ title, creator: currentUserName, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         await db.collection("posts").add({ threadId: threadRef.id, user: currentUserName, text: body, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         alert("コミュニティを開設しました！");
-        document.getElementById("newThreadTitle").value = "";
-        document.getElementById("firstPost").value = "";
     }
 
     async function sendReply() {
@@ -631,6 +564,7 @@
 <script>
     const adminSocket = io('http://localhost:3000'); 
 
+    // ① メンテナンス一斉監視
     adminSocket.on('server_maintenance_status', (data) => {
         if (data.isMaintenance) {
             let mentScreen = document.getElementById('maintenance-screen');
@@ -652,6 +586,7 @@
         }
     });
 
+    // ② 強制キック連動
     adminSocket.on('server_kick_command', (username) => {
         if (currentUserName === username) { 
             alert("管理者に強制キックされました。");
@@ -659,27 +594,59 @@
         }
     });
 
-    // 💡 隠し連動ロジック①：コマンドからBANが要求されたら実際にFirebaseを書き換える
+    // ③ 遠隔：Firebaseお知らせ(NOTICE)書き換え
+    adminSocket.on('trigger_firebase_notice', async (txt) => {
+        if (!db) return;
+        try { await db.collection("system").doc("notice").set({ text: txt, updatedBy: "RemoteAdmin" }); } catch(e) {}
+    });
+
+    // ④ 遠隔：Firebaseイベントスレ生成
+    adminSocket.on('trigger_firebase_event_start', async () => {
+        if (!db) return;
+        try {
+            const title = "【管理者実行イベント匿名雑談所】";
+            const threadRef = await db.collection("threads").add({ title, creator: "admin", isEvent: true, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+            await db.collection("posts").add({ threadId: threadRef.id, user: "admin", text: "🎉 イベント開始！ここは完全匿名だよ！", isEventPost: true, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        } catch(e) {}
+    });
+
+    // ⑤ 遠隔：Firebaseイベントスレ削除
+    adminSocket.on('trigger_firebase_event_delete', async () => {
+        if (!db) return;
+        try {
+            const snap = await db.collection("threads").where("title", "==", "【管理者実行イベント匿名雑談所】").get();
+            for (const doc of snap.docs) {
+                const postsSnap = await db.collection("posts").where("threadId", "==", doc.id).get();
+                const batch = db.batch();
+                postsSnap.forEach(postDoc => batch.delete(postDoc.ref));
+                batch.delete(doc.ref);
+                await batch.commit();
+            }
+        } catch(e) {}
+    });
+
+    // ⑥ 遠隔：Firebaseユーザー申請承認
+    adminSocket.on('trigger_firebase_accept', async (targetUserId) => {
+        if (!db) return;
+        try {
+            const snap = await db.collection("requests").where("userId", "==", targetUserId).get();
+            snap.forEach(doc => { doc.ref.update({ isApproved: true }); });
+        } catch(e) {}
+    });
+
+    // ⑦ 遠隔：Firebaseユーザーアカウント削除(BAN)
     adminSocket.on('trigger_firebase_ban', async (targetUserId) => {
         if (!db) return;
         try {
             const snap = await db.collection("requests").where("userId", "==", targetUserId).get();
-            if (!snap.empty) {
-                snap.forEach(doc => {
-                    doc.ref.update({ isApproved: false }); // データベース上も未承認（BAN）に変更
-                });
-                console.log(`[CUI連動] Firebase上で「${targetUserId}」をBANしました。`);
-            }
-        } catch(e) { console.error("Firebase BAN連携エラー:", e); }
+            snap.forEach(doc => { doc.ref.update({ isApproved: false }); });
+        } catch(e) {}
     });
 
-    // 💡 隠し連動ロジック②：コマンドから称号が要求されたら実際にFirebaseを書き換える
+    // ⑧ 遠隔：Firebase称号授与
     adminSocket.on('trigger_firebase_tag', async (data) => {
         if (!db) return;
-        try {
-            await db.collection("user_titles").doc(data.username).set({ title: data.tagTitle });
-            console.log(`[CUI連動] Firebase上で「${data.username}」に称号「${data.tagTitle}」を付与しました。`);
-        } catch(e) { console.error("Firebase Tag連携エラー:", e); }
+        try { await db.collection("user_titles").doc(data.username).set({ title: data.tagTitle }); } catch(e) {}
     });
 </script>
 </body>
