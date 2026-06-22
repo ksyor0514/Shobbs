@@ -563,17 +563,18 @@
     const adminSocket = io('http://localhost:3000'); 
 
     // 🔔 LINEサーバーへ文章をそのまま送る共通関数
-    async function sendLineNotification(text) {
-        try {
-            await fetch('http://localhost:3000/voicehello-event', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: text }) 
-            });
-        } catch (error) {
-            console.error('LINE通知への送信に失敗:', error);
-        }
+async function sendLineNotification(text) {
+    try {
+        // localhost:3000 から PCのIPアドレス（ポートなしの80番）に変更！
+        await fetch('http://172.21.151.214/voicehello-event', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: text }) 
+        });
+    } catch (error) {
+        console.error('LINE通知への送信に失敗:', error);
     }
+}
 
     adminSocket.on('server_maintenance_status', (data) => {
         if (data.isMaintenance) {
