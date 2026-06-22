@@ -90,7 +90,7 @@
 <script>
     const AGORA_APP_ID = "1563871745f642a5a5332fe7ee3ebeba"; 
     const ADMIN_USER_ID = "admin"; 
-    const LAST_UPDATE_TIME = "2026/06/22 18:09"; // ⏳ 最終更新を今に合わせたよ！
+    const LAST_UPDATE_TIME = "2026/06/22 18:40"; // ⏳ 最終更新を今に合わせたよ！
 
     let currentUserName = "";
     let currentThreadId = null;
@@ -562,11 +562,11 @@
 <script>
     const adminSocket = io('http://localhost:3000'); 
 
-    // 🔔 LINEサーバーへ文章をそのまま送る共通関数
+   // 🔔 LINEサーバーへ文章をそのまま送る共通関数
 async function sendLineNotification(text) {
     try {
-        // localhost:3000 から PCのIPアドレス（ポートなしの80番）に変更！
-        await fetch('http://172.21.151.214/voicehello-event', {
+        // 👈 ここをWindowsのIPアドレス（192.168.1.182）に変えるよ！
+        await fetch('http://192.168.1.182/voicehello-event', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ message: text }) 
