@@ -85,13 +85,12 @@
 <body>
 <div id="root" class="container"></div>
 <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.21.0.js"></script>
-<script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.21.0.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
     const AGORA_APP_ID = "1563871745f642a5a5332fe7ee3ebeba"; 
     const ADMIN_USER_ID = "admin"; 
-    const LAST_UPDATE_TIME = "2026/06/21 18:25";
+    const LAST_UPDATE_TIME = "2026/06/22 18:09"; // ⏳ 最終更新を今に合わせたよ！
 
     let currentUserName = "";
     let currentThreadId = null;
@@ -243,6 +242,11 @@
         const text = document.getElementById('myStatusInput').value;
         await db.collection("statuses").doc(currentUserName).set({ text, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         document.getElementById('myStatusInput').value = "";
+
+        // 🔔 LINEへストーリー更新を直接分かりやすい文字で送信
+        if(text.trim()) {
+            sendLineNotification(`${currentUserName}のストーリー : ${text}`);
+        }
     }
 
     async function saveAvatar() {
@@ -480,9 +484,9 @@
             localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
             await client.publish([localAudioTrack]);
             
-            // 🔔 LINEへ通話開始のイベント通知を追加
+            // 🔔 LINEへ通話開始の通知（Shoさん指定の文面！）
             const currentThreadTitle = document.querySelector('h1[style*="font-size:1.2em"]')?.innerText || "不明なコミュニティ";
-            sendLineNotification('call_start', currentThreadTitle);
+            sendLineNotification(`「${currentThreadTitle}」で通話が始まりました！`);
 
             document.getElementById('join-btn').style.display = 'none';
             document.getElementById('leave-btn').style.display = 'block';
@@ -541,8 +545,8 @@
         await db.collection("posts").add({ threadId: threadRef.id, user: currentUserName, text: body, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         alert("コミュニティを開設しました！");
 
-        // 🔔 LINEへ新しいスレ作成のイベント通知を追加
-        sendLineNotification('new_thread', title);
+        // 🔔 LINEへ新しいスレ作成の通知（Shoさん指定の文面！）
+        sendLineNotification(`「${title}」が作られました！`);
     }
 
     async function sendReply() {
@@ -550,10 +554,6 @@
         if(!text) return alert("文字を入力してね");
         await db.collection("posts").add({ threadId: currentThreadId, user: currentUserName, text, isEventPost: currentThreadIsEvent, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         
-        // 🔔 LINEへ投稿完了のイベント通知を追加
-        const currentThreadTitle = document.querySelector('h1[style*="font-size:1.2em"]')?.innerText || "不明なコミュニティ";
-        sendLineNotification('post', currentThreadTitle, currentUserName);
-
         document.getElementById("replyText").value = "";
     }
 </script>
@@ -562,13 +562,13 @@
 <script>
     const adminSocket = io('http://localhost:3000'); 
 
-    // 🔔 LINEサーバーへイベントデータを横流しする共通関数をここに追加
-    async function sendLineNotification(type, threadName, userName = '') {
+    // 🔔 LINEサーバーへ文章をそのまま送る共通関数
+    async function sendLineNotification(text) {
         try {
             await fetch('http://localhost:3000/voicehello-event', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type, threadName, userName })
+                body: JSON.stringify({ message: text }) 
             });
         } catch (error) {
             console.error('LINE通知への送信に失敗:', error);
@@ -619,7 +619,7 @@
     adminSocket.on('trigger_firebase_event_delete', async () => {
         if (!db) return;
         try {
-            // イベント削除の処理（以前実装した通りの安全な終了）
+            // イベント削除の処理
         } catch(e) {}
     });
 </script>
