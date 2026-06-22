@@ -566,11 +566,11 @@
 async function sendLineNotification(text) {
     try {
         // 👈 ここをWindowsのIPアドレス（192.168.1.182）に変えるよ！
-        await fetch('http://192.168.1.182/voicehello-event', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: text }) 
-        });
+        await fetch('https://voicehello-backend.onrender.com/voicehello-event', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: text }) 
+});
     } catch (error) {
         console.error('LINE通知への送信に失敗:', error);
     }
